@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import axios from 'axios';
+import { httpClient } from './http-client';
 import { config } from '../config';
 import { exchangeCodeForTokens } from './tokens';
 
@@ -26,7 +26,7 @@ export async function handleOAuthCallback(req: Request, res: Response) {
     // Example: await saveUserTokens(tokenData);
 
     // Get deep link to redirect user back to Zoom app
-    const deepLinkResponse = await axios.post(
+    const deepLinkResponse = await httpClient.post(
       `${config.zoom.apiHost}/v2/zoomapp/deeplink`,
       { action: 'go' },
       {

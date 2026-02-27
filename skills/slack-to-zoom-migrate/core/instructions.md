@@ -154,50 +154,9 @@ Use the Explore agent to analyze the codebase:
 
 ## Step 4: Choose Template
 
-### If Poker Planner (100% migration):
-Use the complete Poker Planner template from `templates/poker-planner/`
-
-### If other app (best-effort migration):
-Use the general template from `templates/general/` and adapt
+Use the general template from `templates/general/` and adapt based on app features detected
 
 ## Step 5: Generate Zoom App
-
-### For Poker Planner:
-
-1. **Copy complete template**:
-   ```bash
-   cp -r templates/poker-planner/* <output-directory>/
-   ```
-
-2. **Update package.json**:
-   - Set appropriate name
-   - Update description
-
-3. **Create .env.example** with placeholders:
-   ```env
-   ZOOM_CLIENT_ID=your_client_id
-   ZOOM_CLIENT_SECRET=your_client_secret
-   ZOOM_BOT_JID=your_bot_jid@xmpp.zoom.us
-   ZOOM_WEBHOOK_SECRET_TOKEN=your_token
-   ZOOM_REDIRECT_URI=https://your-domain.com/api/zoomapp/auth
-   ZOOM_API_HOST=https://api.zoom.us
-   ZOOM_OAUTH_HOST=https://zoom.us
-   APP_NAME=Poker Planner
-   ```
-
-4. **Generate README.md** with:
-   - Setup instructions
-   - Zoom Marketplace configuration steps
-   - Usage guide
-   - All features documented
-
-5. **Generate MIGRATION_GUIDE.md**:
-   - Feature parity: 90%
-   - What works: All core features + 4 advanced features
-   - What's different: UI is message cards instead of modals
-   - Zero manual fixes needed
-
-### For General App:
 
 1. **Copy general template**:
    ```bash
@@ -318,7 +277,21 @@ Apply these Zoom-specific fixes to all generated code:
    }
    ```
 
-3. **Fire-and-forget webhooks**:
+3. **HTTP timeout (CRITICAL)**:
+   - **ALWAYS** use the shared `httpClient` from `./http-client` instead of raw `axios`
+   - The httpClient has a 15-second timeout to prevent hanging on unresponsive APIs
+   - Example:
+   ```typescript
+   // ❌ Wrong (no timeout, hangs indefinitely)
+   import axios from 'axios';
+   const response = await axios.post(url, data);
+
+   // ✅ Correct (15s timeout)
+   import { httpClient } from './http-client';
+   const response = await httpClient.post(url, data);
+   ```
+
+4. **Fire-and-forget webhooks**:
    ```typescript
    // ❌ Wrong (causes "headers already sent" error)
    await handleCommand(...);
@@ -329,14 +302,14 @@ Apply these Zoom-specific fixes to all generated code:
    handleCommand(...).catch(console.error);
    ```
 
-4. **OAuth grant type**:
+5. **OAuth grant type**:
    - Use `client_credentials` not `account_credentials`
 
-5. **No style properties**:
+6. **No style properties**:
    - Remove any `style: 'italic'`, `style: 'bold'` properties
    - Use markdown syntax instead: `*bold*`, `_italic_`
 
-6. **Button styles (CRITICAL)**:
+7. **Button styles (CRITICAL)**:
    - **Slack uses lowercase**: `'primary'`, `'danger'`, `'default'`
    - **Zoom requires capitalized**: `'Primary'`, `'Danger'`, `'Default'`
    - TypeScript interface must also use capitalized values:
@@ -349,7 +322,7 @@ Apply these Zoom-specific fixes to all generated code:
    }
    ```
 
-7. **Button value format**:
+8. **Button value format**:
    ```typescript
    {
      text: 'Button Text',
@@ -358,7 +331,7 @@ Apply these Zoom-specific fixes to all generated code:
    }
    ```
 
-8. **Button actions must use channel ID from webhook (CRITICAL)**:
+9. **Button actions must use channel ID from webhook (CRITICAL)**:
    - Extract `toJid` from webhook payload when handling button clicks
    - Pass it as `channelId` to button action handlers
    - Use it when sending new messages (not `userJid`)
@@ -378,7 +351,7 @@ Apply these Zoom-specific fixes to all generated code:
    ```
    - See [COMMON_FIXES.md](../docs/COMMON_FIXES.md) for detailed examples
 
-9. **Consider disabling auto-reveal for voting apps**:
+10. **Consider disabling auto-reveal for voting apps**:
    - Original Slack Poker Planner had auto-reveal when all participants voted
    - Many users prefer manual reveal for better control
    - Remove auto-reveal logic if not explicitly requested:

@@ -2,7 +2,6 @@
  * Integration tests for Zoom messaging
  */
 
-import axios from 'axios';
 import { sendMessage, updateMessage } from '../../src/zoom/messaging';
 import { clearTokenCache } from '../../src/zoom/tokens';
 import { mockZoomAPI } from '../helpers/mocks';

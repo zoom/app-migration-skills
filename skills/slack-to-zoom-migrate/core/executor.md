@@ -53,6 +53,33 @@ text: "**Bold Title**"  // WRONG!
 text: "~~strikethrough~~"  // WRONG!
 ```
 
+### 🚨 ALWAYS USE httpClient WITH TIMEOUT (CRITICAL!)
+
+**Problem:** Raw `axios` calls have no timeout → hangs indefinitely if Zoom API is unresponsive
+
+**Solution:** ALWAYS use the shared `httpClient` from `./http-client` instead of `axios`:
+
+```typescript
+// ❌ WRONG - No timeout, hangs forever
+import axios from 'axios';
+const response = await axios.post(url, data);
+
+// ✅ CORRECT - 15 second timeout prevents hanging
+import { httpClient } from './http-client';
+const response = await httpClient.post(url, data);
+```
+
+**The template includes `src/zoom/http-client.ts` with:**
+- 15-second timeout on all requests
+- Consistent error handling
+- Easy to add retry logic if needed
+
+**ALWAYS use httpClient in:**
+- `src/zoom/auth.ts` - OAuth and deep link calls
+- `src/zoom/tokens.ts` - Token generation calls
+- `src/zoom/messaging.ts` - Message API calls
+- Any new files that make HTTP requests
+
 ### ✅ Phase 5: Code Validation (Flexible)
 
 Phase 5 validates that the generated code compiles and works correctly.
@@ -192,13 +219,13 @@ cd "$OUTPUT_DIR" || exit 1
 [ -f "package.json" ] && echo "Found package.json"
 
 # ✅ Good: Use absolute paths
-cp -r "$SKILL_DIR/templates/poker-planner/"* "$OUTPUT_DIR/"
+cp -r "$SKILL_DIR/templates/general/"* "$OUTPUT_DIR/"
 
 # ❌ Bad: Assume directory exists
 cd poker-planner-zoom  # WILL FAIL if not in right location
 
 # ❌ Bad: Relative paths without verification
-cp -r templates/poker-planner/* ./output/
+cp -r templates/general/* ./output/
 ```
 
 ### 5. Credential Validation
@@ -628,16 +655,17 @@ Combine all analysis into a comprehensive map:
 *Step 1.6: Internal Detection (Not Shown to User)*
 
 ```bash
-# Internal detection logic
-DETECTED_PATTERN=$(detect_app_pattern "$SOURCE_DIR")
+# Always use general template - it's flexible and works for all apps
+echo "[Internal] Using general template"
+TEMPLATE_DIR="$SKILL_DIR/templates/general"
 
+# Adjust expected parity based on app complexity
+DETECTED_PATTERN=$(detect_app_pattern "$SOURCE_DIR")
 if [ -n "$DETECTED_PATTERN" ]; then
-  echo "[Internal] Pattern detected: $DETECTED_PATTERN"
-  TEMPLATE_DIR="$SKILL_DIR/templates/$DETECTED_PATTERN"
+  echo "[Internal] Pattern detected: $DETECTED_PATTERN (high compatibility expected)"
   EXPECTED_PARITY=90
 else
-  echo "[Internal] Generic app, using general template"
-  TEMPLATE_DIR="$SKILL_DIR/templates/general"
+  echo "[Internal] Generic app detected"
   EXPECTED_PARITY=75
 fi
 ```
