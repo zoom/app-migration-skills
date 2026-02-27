@@ -445,7 +445,9 @@ Users with symlinked installations (Option 2) get updates automatically on `git 
 
 ## 📄 License
 
-This project is maintained by Zoom Video Communications, Inc.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2025 Zoom Video Communications, Inc.
 
 ---
 

@@ -169,5 +169,5 @@ Generate the Zoom app in: `./slack-to-zoom-migrate-output/` or `<app-name>-zoom/
 ## Skill Metadata
 
 - **Version:** 1.0.0
-- **Author:** Claude
-- **Required Tools:** Bash, Read, Write, Glob, Grep, Task, WebFetch
+- **Author:** Zoom
+- **Required Tools:** Bash, Read, Write, Glob, Grep, Task

@@ -5,8 +5,13 @@ import { handleWebhook } from './zoom/webhook';
 
 const app = express();
 
-// Middleware
-app.use(express.json());
+// Middleware - capture raw body for webhook signature verification
+app.use(express.json({
+  verify: (req: any, res, buf) => {
+    // Store raw body for HMAC signature verification
+    req.rawBody = buf.toString('utf8');
+  }
+}));
 
 // Health check
 app.get('/', (req, res) => {
