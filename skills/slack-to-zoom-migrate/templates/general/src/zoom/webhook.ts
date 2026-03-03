@@ -12,13 +12,52 @@ function encryptToken(token: string, secretToken: string): string {
 }
 
 /**
+ * Verify webhook signature to prevent forgery
+ * CRITICAL: Must be called for all non-validation events
+ */
+function verifyWebhookSignature(req: Request): boolean {
+  const signature = req.headers['x-zm-signature'] as string;
+  const timestamp = req.headers['x-zm-request-timestamp'] as string;
+  const rawBody = (req as any).rawBody;
+
+  if (!signature || !timestamp || !rawBody) {
+    console.error('Missing signature headers or raw body');
+    return false;
+  }
+
+  // Prevent replay attacks - reject requests older than 5 minutes
+  const requestTime = parseInt(timestamp, 10);
+  const currentTime = Math.floor(Date.now() / 1000);
+  if (Math.abs(currentTime - requestTime) > 300) {
+    console.error('Request timestamp too old or too far in future');
+    return false;
+  }
+
+  // Verify HMAC signature
+  const message = `v0:${timestamp}:${rawBody}`;
+  const hash = crypto
+    .createHmac('sha256', config.zoom.webhookSecretToken)
+    .update(message)
+    .digest('hex');
+
+  const expectedSignature = `v0=${hash}`;
+
+  if (expectedSignature !== signature) {
+    console.error('Invalid webhook signature');
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Webhook handler for Zoom events
  */
 export async function handleWebhook(req: Request, res: Response) {
   try {
     const body = req.body as ZoomWebhookPayload;
 
-    // Handle URL validation
+    // Handle URL validation (no signature verification needed)
     if (body.event === 'endpoint.url_validation') {
       const plainToken = body.payload.plainToken || '';
       const encryptedToken = encryptToken(plainToken, config.zoom.webhookSecretToken);
@@ -28,6 +67,12 @@ export async function handleWebhook(req: Request, res: Response) {
         plainToken,
         encryptedToken,
       });
+    }
+
+    // CRITICAL: Verify signature for all other events to prevent forgery
+    if (!verifyWebhookSignature(req)) {
+      console.error('Webhook signature verification failed');
+      return res.status(401).json({ error: 'Invalid signature' });
     }
 
     // Handle bot notification (slash command)

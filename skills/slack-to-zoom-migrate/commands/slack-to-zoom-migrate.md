@@ -1,7 +1,7 @@
 ---
 description: Convert a Slack app to Zoom Team Chat app
 argument-hint: <github-url-or-path>
-allowed-tools: [Bash, Read, Write, Glob, Grep, Task, WebFetch, AskUserQuestion, Edit]
+allowed-tools: [Bash, Read, Write, Glob, Grep, Task, AskUserQuestion, Edit]
 ---
 
 # Slack to Zoom Migration Command

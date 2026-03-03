@@ -53,6 +53,174 @@ text: "**Bold Title**"  // WRONG!
 text: "~~strikethrough~~"  // WRONG!
 ```
 
+### 🚨 ALWAYS USE httpClient WITH TIMEOUT (CRITICAL!)
+
+**Problem:** Raw `axios` calls have no timeout → hangs indefinitely if Zoom API is unresponsive
+
+**Solution:** ALWAYS use the shared `httpClient` from `./http-client` instead of `axios`:
+
+```typescript
+// ❌ WRONG - No timeout, hangs forever
+import axios from 'axios';
+const response = await axios.post(url, data);
+
+// ✅ CORRECT - 15 second timeout prevents hanging
+import { httpClient } from './http-client';
+const response = await httpClient.post(url, data);
+```
+
+**The template includes `src/zoom/http-client.ts` with:**
+- 15-second timeout on all requests
+- Consistent error handling
+- Easy to add retry logic if needed
+
+**ALWAYS use httpClient in:**
+- `src/zoom/auth.ts` - OAuth and deep link calls
+- `src/zoom/tokens.ts` - Token generation calls
+- `src/zoom/messaging.ts` - Message API calls
+- Any new files that make HTTP requests
+
+### 🚨 USE CRYPTOGRAPHICALLY SECURE RANDOM FOR IDs (CRITICAL!)
+
+**Problem:** `Math.random()` is NOT cryptographically secure and should NEVER be used for session IDs, tokens, or any security-sensitive values.
+
+**Solution:** ALWAYS use `crypto.randomBytes()` for generating IDs:
+
+```typescript
+// ❌ WRONG - Not cryptographically secure, predictable
+import { generateId } from './utils';
+export function generateId(): string {
+  return `session_${Math.random().toString(36)}`;
+}
+
+// ✅ CORRECT - Cryptographically secure
+import { randomBytes } from 'crypto';
+export function generateId(): string {
+  return `session_${Date.now()}_${randomBytes(12).toString('hex')}`;
+}
+```
+
+**Why this matters:**
+- Session IDs must be unpredictable to prevent session hijacking
+- Math.random() is predictable and can be guessed by attackers
+- crypto.randomBytes() uses OS entropy and is cryptographically secure
+
+**ALWAYS use crypto.randomBytes() for:**
+- Session IDs
+- Temporary tokens
+- Nonces
+- Any identifier used for security or privacy
+
+### 🚨 VERIFY WEBHOOK SIGNATURES (CRITICAL!)
+
+**Problem:** Without signature verification, anyone who discovers your webhook URL can forge events and trigger unauthorized actions.
+
+**CRITICAL:** The template only validates signatures for `endpoint.url_validation`. All other events (`bot_notification`, `interactive_message_actions`) MUST also be verified.
+
+**Solution:** Always verify webhook signatures for non-validation events:
+
+```typescript
+// Step 1: Configure express to capture raw body (server.ts)
+app.use(express.json({
+  verify: (req: any, res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  }
+}));
+
+// Step 2: Verify signature for all events (webhook.ts)
+function verifyWebhookSignature(req: Request): boolean {
+  const signature = req.headers['x-zm-signature'] as string;
+  const timestamp = req.headers['x-zm-request-timestamp'] as string;
+  const rawBody = (req as any).rawBody;
+
+  if (!signature || !timestamp || !rawBody) {
+    return false;
+  }
+
+  // Prevent replay attacks - reject requests older than 5 minutes
+  const requestTime = parseInt(timestamp, 10);
+  const currentTime = Math.floor(Date.now() / 1000);
+  if (Math.abs(currentTime - requestTime) > 300) {
+    return false;
+  }
+
+  // Verify HMAC signature
+  const message = `v0:${timestamp}:${rawBody}`;
+  const hash = crypto
+    .createHmac('sha256', config.zoom.webhookSecretToken)
+    .update(message)
+    .digest('hex');
+
+  return `v0=${hash}` === signature;
+}
+
+export async function handleWebhook(req: Request, res: Response) {
+  // URL validation event (no signature check needed)
+  if (body.event === 'endpoint.url_validation') {
+    // ... handle validation
+  }
+
+  // CRITICAL: Verify signature for ALL other events
+  if (!verifyWebhookSignature(req)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  // Safe to process events now...
+}
+```
+
+**Why this matters:**
+- Prevents unauthorized command execution
+- Stops event forgery and impersonation attacks
+- Protects against replay attacks (5-minute window)
+- Required for production security
+
+**ALWAYS verify signatures for:**
+- bot_notification (slash commands)
+- interactive_message_actions (button clicks)
+- bot_installed / app_deauthorized events
+- Any event except endpoint.url_validation
+
+### 🚨 ESCAPE HTML TO PREVENT XSS (CRITICAL!)
+
+**Problem:** Injecting config values or user data directly into HTML without escaping creates XSS vulnerabilities. A compromised .env file or malicious user input could inject `<script>` tags.
+
+**Example Attack:** If `APP_NAME="MyApp<script>alert('XSS')</script>"`, the OAuth success page would execute the attacker's JavaScript in users' browsers.
+
+**Solution:** Always escape HTML when generating HTML responses:
+
+```typescript
+// Create src/lib/security.ts
+export function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Use in src/zoom/auth.ts
+import { escapeHtml } from '../lib/security';
+
+// ❌ WRONG - XSS vulnerability
+res.send(`<h1>${config.appName} Installed!</h1>`);
+
+// ✅ CORRECT - Safe from XSS
+res.send(`<h1>${escapeHtml(config.appName)} Installed!</h1>`);
+```
+
+**Why this matters:**
+- Prevents script injection via compromised .env files
+- Protects against stored XSS if app name comes from database
+- Defense-in-depth security layer
+
+**ALWAYS escape when injecting into HTML:**
+- Config values (app names, URLs, etc.)
+- User input (names, messages, etc.)
+- Error messages or dynamic content
+- Any string that goes into an HTML template
+
 ### ✅ Phase 5: Code Validation (Flexible)
 
 Phase 5 validates that the generated code compiles and works correctly.
@@ -165,9 +333,13 @@ fi
 
 ### 3. Git Clone Safety
 ```bash
-# Clone to temp directory with error handling
+# Clone to temp directory with error handling and security flags
 TEMP_DIR="/tmp/slack-migration-$(date +%s)"
-git clone "$GITHUB_URL" "$TEMP_DIR" 2>&1 || {
+git clone \
+  --depth 1 \
+  --single-branch \
+  --config core.hooksPath=/dev/null \
+  "$GITHUB_URL" "$TEMP_DIR" 2>&1 || {
   echo "❌ Failed to clone repository: $GITHUB_URL"
   echo "Please verify the URL is correct and accessible."
   exit 1
@@ -192,13 +364,13 @@ cd "$OUTPUT_DIR" || exit 1
 [ -f "package.json" ] && echo "Found package.json"
 
 # ✅ Good: Use absolute paths
-cp -r "$SKILL_DIR/templates/poker-planner/"* "$OUTPUT_DIR/"
+cp -r "$SKILL_DIR/templates/general/"* "$OUTPUT_DIR/"
 
 # ❌ Bad: Assume directory exists
 cd poker-planner-zoom  # WILL FAIL if not in right location
 
 # ❌ Bad: Relative paths without verification
-cp -r templates/poker-planner/* ./output/
+cp -r templates/general/* ./output/
 ```
 
 ### 5. Credential Validation
@@ -628,16 +800,17 @@ Combine all analysis into a comprehensive map:
 *Step 1.6: Internal Detection (Not Shown to User)*
 
 ```bash
-# Internal detection logic
-DETECTED_PATTERN=$(detect_app_pattern "$SOURCE_DIR")
+# Always use general template - it's flexible and works for all apps
+echo "[Internal] Using general template"
+TEMPLATE_DIR="$SKILL_DIR/templates/general"
 
+# Adjust expected parity based on app complexity
+DETECTED_PATTERN=$(detect_app_pattern "$SOURCE_DIR")
 if [ -n "$DETECTED_PATTERN" ]; then
-  echo "[Internal] Pattern detected: $DETECTED_PATTERN"
-  TEMPLATE_DIR="$SKILL_DIR/templates/$DETECTED_PATTERN"
+  echo "[Internal] Pattern detected: $DETECTED_PATTERN (high compatibility expected)"
   EXPECTED_PARITY=90
 else
-  echo "[Internal] Generic app, using general template"
-  TEMPLATE_DIR="$SKILL_DIR/templates/general"
+  echo "[Internal] Generic app detected"
   EXPECTED_PARITY=75
 fi
 ```
@@ -1092,8 +1265,11 @@ Create helper functions needed by the app:
 ```typescript
 // Generate this in src/lib/utils.ts
 
+import { randomBytes } from 'crypto';
+
 export function generateId(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Use cryptographically secure random generation for session IDs
+  return `session_${Date.now()}_${randomBytes(12).toString('hex')}`;
 }
 
 export function calculateAverage(votes: { [key: string]: string }): number | null {
@@ -1675,14 +1851,17 @@ else
     fi
 
   elif grep -q "EACCES.*permission denied" /tmp/npm-install.log; then
-    echo "🔧 Attempting fix: Permission denied - using --unsafe-perm"
-    npm install --unsafe-perm --silent 2>&1 > /tmp/npm-install.log
-    if [ $? -eq 0 ]; then
-      PACKAGE_COUNT=$(npm list --depth=0 2>/dev/null | grep -c "├─\|└─" || echo "150+")
-      echo "✅ Fixed with --unsafe-perm ($PACKAGE_COUNT packages)"
-      STEP1_PASSED=true
-      FIXES_APPLIED["npm-unsafe-perm"]="Used --unsafe-perm for permission issues"
-    fi
+    echo "❌ Permission denied during npm install"
+    echo "   This usually means:"
+    echo "   - npm cache has wrong permissions"
+    echo "   - Output directory has wrong permissions"
+    echo ""
+    echo "   To fix, run one of these:"
+    echo "   - npm cache clean --force"
+    echo "   - sudo chown -R \$USER ~/.npm"
+    echo "   - Check output directory permissions"
+    echo ""
+    STEP1_PASSED=false
 
   elif grep -q "ENOENT.*package.json" /tmp/npm-install.log; then
     echo "🔧 Attempting fix: Corrupted package.json - recreating from backup"

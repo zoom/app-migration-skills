@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import axios from 'axios';
+import { httpClient } from './http-client';
 import { config } from '../config';
 import { exchangeCodeForTokens } from './tokens';
+import { escapeHtml } from '../lib/security';
 
 /**
  * OAuth callback handler
@@ -26,7 +27,7 @@ export async function handleOAuthCallback(req: Request, res: Response) {
     // Example: await saveUserTokens(tokenData);
 
     // Get deep link to redirect user back to Zoom app
-    const deepLinkResponse = await axios.post(
+    const deepLinkResponse = await httpClient.post(
       `${config.zoom.apiHost}/v2/zoomapp/deeplink`,
       { action: 'go' },
       {
@@ -57,7 +58,7 @@ export async function handleOAuthCallback(req: Request, res: Response) {
         </head>
         <body>
           <div class="success">✅</div>
-          <h1>${config.appName} Installed Successfully!</h1>
+          <h1>${escapeHtml(config.appName)} Installed Successfully!</h1>
           <p>Your bot is now active. You can close this window and start messaging your bot in Zoom Team Chat.</p>
           <p>Send a message to get started!</p>
         </body>

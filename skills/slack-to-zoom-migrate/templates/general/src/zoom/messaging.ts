@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpClient } from './http-client';
 import { config } from '../config';
 import { getBotToken } from './tokens';
 import { MessageBody } from '../types';
@@ -83,7 +83,7 @@ export async function sendMessage(
   };
 
   try {
-    const response = await axios.post(
+    const response = await httpClient.post(
       `${config.zoom.apiHost}/v2/im/chat/messages`,
       messageBody,
       {
@@ -162,7 +162,7 @@ export async function updateMessage(
   }
 
   try {
-    const response = await axios.put(
+    const response = await httpClient.put(
       `${config.zoom.apiHost}/v2/im/chat/messages/${messageId}`,
       messageBody,
       {
@@ -188,7 +188,7 @@ export async function deleteMessage(messageId: string): Promise<void> {
   const botToken = await getBotToken();
 
   try {
-    await axios.delete(
+    await httpClient.delete(
       `${config.zoom.apiHost}/v2/im/chat/messages/${messageId}`,
       {
         headers: {
@@ -327,7 +327,7 @@ export async function sendRichMessage(
   };
 
   try {
-    const response = await axios.post(
+    const response = await httpClient.post(
       `${config.zoom.apiHost}/v2/im/chat/messages`,
       messageBody,
       {

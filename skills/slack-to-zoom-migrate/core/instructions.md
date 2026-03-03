@@ -109,7 +109,11 @@ fi
 1. Clone the repository to a temporary directory with error handling:
    ```bash
    TEMP_DIR="/tmp/slack-migration-$(date +%s)"
-   git clone "$GITHUB_URL" "$TEMP_DIR" 2>&1 || {
+   git clone \
+     --depth 1 \
+     --single-branch \
+     --config core.hooksPath=/dev/null \
+     "$GITHUB_URL" "$TEMP_DIR" 2>&1 || {
      echo "❌ Failed to clone repository: $GITHUB_URL"
      exit 1
    }
@@ -120,6 +124,11 @@ fi
      exit 1
    fi
    ```
+
+   **Security flags:**
+   - `--depth 1` - Only clone latest commit (faster, smaller)
+   - `--single-branch` - Only clone default branch (saves bandwidth)
+   - `--config core.hooksPath=/dev/null` - Prevents post-checkout hooks from running
 
 ### If local path:
 1. Verify the path exists
@@ -154,50 +163,9 @@ Use the Explore agent to analyze the codebase:
 
 ## Step 4: Choose Template
 
-### If Poker Planner (100% migration):
-Use the complete Poker Planner template from `templates/poker-planner/`
-
-### If other app (best-effort migration):
-Use the general template from `templates/general/` and adapt
+Use the general template from `templates/general/` and adapt based on app features detected
 
 ## Step 5: Generate Zoom App
-
-### For Poker Planner:
-
-1. **Copy complete template**:
-   ```bash
-   cp -r templates/poker-planner/* <output-directory>/
-   ```
-
-2. **Update package.json**:
-   - Set appropriate name
-   - Update description
-
-3. **Create .env.example** with placeholders:
-   ```env
-   ZOOM_CLIENT_ID=your_client_id
-   ZOOM_CLIENT_SECRET=your_client_secret
-   ZOOM_BOT_JID=your_bot_jid@xmpp.zoom.us
-   ZOOM_WEBHOOK_SECRET_TOKEN=your_token
-   ZOOM_REDIRECT_URI=https://your-domain.com/api/zoomapp/auth
-   ZOOM_API_HOST=https://api.zoom.us
-   ZOOM_OAUTH_HOST=https://zoom.us
-   APP_NAME=Poker Planner
-   ```
-
-4. **Generate README.md** with:
-   - Setup instructions
-   - Zoom Marketplace configuration steps
-   - Usage guide
-   - All features documented
-
-5. **Generate MIGRATION_GUIDE.md**:
-   - Feature parity: 90%
-   - What works: All core features + 4 advanced features
-   - What's different: UI is message cards instead of modals
-   - Zero manual fixes needed
-
-### For General App:
 
 1. **Copy general template**:
    ```bash
@@ -318,7 +286,21 @@ Apply these Zoom-specific fixes to all generated code:
    }
    ```
 
-3. **Fire-and-forget webhooks**:
+3. **HTTP timeout (CRITICAL)**:
+   - **ALWAYS** use the shared `httpClient` from `./http-client` instead of raw `axios`
+   - The httpClient has a 15-second timeout to prevent hanging on unresponsive APIs
+   - Example:
+   ```typescript
+   // ❌ Wrong (no timeout, hangs indefinitely)
+   import axios from 'axios';
+   const response = await axios.post(url, data);
+
+   // ✅ Correct (15s timeout)
+   import { httpClient } from './http-client';
+   const response = await httpClient.post(url, data);
+   ```
+
+4. **Fire-and-forget webhooks**:
    ```typescript
    // ❌ Wrong (causes "headers already sent" error)
    await handleCommand(...);
@@ -329,14 +311,14 @@ Apply these Zoom-specific fixes to all generated code:
    handleCommand(...).catch(console.error);
    ```
 
-4. **OAuth grant type**:
+5. **OAuth grant type**:
    - Use `client_credentials` not `account_credentials`
 
-5. **No style properties**:
+6. **No style properties**:
    - Remove any `style: 'italic'`, `style: 'bold'` properties
    - Use markdown syntax instead: `*bold*`, `_italic_`
 
-6. **Button styles (CRITICAL)**:
+7. **Button styles (CRITICAL)**:
    - **Slack uses lowercase**: `'primary'`, `'danger'`, `'default'`
    - **Zoom requires capitalized**: `'Primary'`, `'Danger'`, `'Default'`
    - TypeScript interface must also use capitalized values:
@@ -349,7 +331,7 @@ Apply these Zoom-specific fixes to all generated code:
    }
    ```
 
-7. **Button value format**:
+8. **Button value format**:
    ```typescript
    {
      text: 'Button Text',
@@ -358,7 +340,7 @@ Apply these Zoom-specific fixes to all generated code:
    }
    ```
 
-8. **Button actions must use channel ID from webhook (CRITICAL)**:
+9. **Button actions must use channel ID from webhook (CRITICAL)**:
    - Extract `toJid` from webhook payload when handling button clicks
    - Pass it as `channelId` to button action handlers
    - Use it when sending new messages (not `userJid`)
@@ -378,7 +360,7 @@ Apply these Zoom-specific fixes to all generated code:
    ```
    - See [COMMON_FIXES.md](../docs/COMMON_FIXES.md) for detailed examples
 
-9. **Consider disabling auto-reveal for voting apps**:
+10. **Consider disabling auto-reveal for voting apps**:
    - Original Slack Poker Planner had auto-reveal when all participants voted
    - Many users prefer manual reveal for better control
    - Remove auto-reveal logic if not explicitly requested:
@@ -393,6 +375,111 @@ Apply these Zoom-specific fixes to all generated code:
    await updateMessage(...);  // Just update vote count
    // User clicks "Reveal" button when ready
    ```
+
+11. **Cryptographically secure random generation (CRITICAL)**:
+   - **NEVER** use `Math.random()` for session IDs, tokens, or security-sensitive values
+   - **ALWAYS** use `crypto.randomBytes()` for unpredictable random generation
+   - Example:
+   ```typescript
+   // ❌ Wrong (predictable, not secure)
+   function generateId(): string {
+     return `session_${Math.random().toString(36)}`;
+   }
+
+   // ✅ Correct (cryptographically secure)
+   import { randomBytes } from 'crypto';
+   function generateId(): string {
+     return `session_${Date.now()}_${randomBytes(12).toString('hex')}`;
+   }
+   ```
+   - Math.random() is predictable and can be exploited for session hijacking
+   - crypto.randomBytes() uses OS entropy and is cryptographically secure
+
+12. **Webhook signature verification (CRITICAL)**:
+   - **ALWAYS** verify webhook signatures for all non-validation events
+   - Without signature verification, anyone who discovers the webhook URL can forge events
+   - Configure express to capture raw body:
+   ```typescript
+   // server.ts
+   app.use(express.json({
+     verify: (req: any, res, buf) => {
+       req.rawBody = buf.toString('utf8');
+     }
+   }));
+   ```
+   - Verify signature for all actual events:
+   ```typescript
+   // webhook.ts
+   function verifyWebhookSignature(req: Request): boolean {
+     const signature = req.headers['x-zm-signature'] as string;
+     const timestamp = req.headers['x-zm-request-timestamp'] as string;
+     const rawBody = (req as any).rawBody;
+
+     if (!signature || !timestamp || !rawBody) {
+       return false;
+     }
+
+     // Prevent replay attacks - reject requests older than 5 minutes
+     const requestTime = parseInt(timestamp, 10);
+     const currentTime = Math.floor(Date.now() / 1000);
+     if (Math.abs(currentTime - requestTime) > 300) {
+       return false;
+     }
+
+     // Verify HMAC signature
+     const message = `v0:${timestamp}:${rawBody}`;
+     const hash = crypto
+       .createHmac('sha256', config.zoom.webhookSecretToken)
+       .update(message)
+       .digest('hex');
+
+     return `v0=${hash}` === signature;
+   }
+
+   export async function handleWebhook(req: Request, res: Response) {
+     // Handle URL validation (no signature check needed)
+     if (body.event === 'endpoint.url_validation') {
+       // ... validation logic
+     }
+
+     // CRITICAL: Verify signature for all other events
+     if (!verifyWebhookSignature(req)) {
+       return res.status(401).json({ error: 'Invalid signature' });
+     }
+
+     // Process events...
+   }
+   ```
+   - See [webhook-validation.md](../docs/code-examples/webhook-validation.md) for complete examples
+
+13. **HTML escaping to prevent XSS (CRITICAL)**:
+   - **ALWAYS** escape HTML when injecting config or user data into HTML templates
+   - Without escaping, malicious values can inject scripts that execute in users' browsers
+   - Create security utility:
+   ```typescript
+   // src/lib/security.ts
+   export function escapeHtml(unsafe: string): string {
+     return unsafe
+       .replace(/&/g, '&amp;')
+       .replace(/</g, '&lt;')
+       .replace(/>/g, '&gt;')
+       .replace(/"/g, '&quot;')
+       .replace(/'/g, '&#039;');
+   }
+   ```
+   - Use in OAuth success page:
+   ```typescript
+   // src/zoom/auth.ts
+   import { escapeHtml } from '../lib/security';
+
+   // ❌ Wrong (XSS vulnerability)
+   res.send(`<h1>${config.appName} Installed!</h1>`);
+
+   // ✅ Correct (safe from XSS)
+   res.send(`<h1>${escapeHtml(config.appName)} Installed!</h1>`);
+   ```
+   - Attacker could set `APP_NAME="App<script>alert('XSS')</script>"` via compromised .env
+   - Always escape: app names, user input, error messages, or any dynamic content in HTML
 
 ## Step 7: Generate Documentation
 

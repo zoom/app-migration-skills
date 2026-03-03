@@ -2,7 +2,7 @@
  * Mock helpers for testing Zoom API integration
  */
 
-import axios from 'axios';
+import { httpClient } from '../../src/zoom/http-client';
 
 export const mockZoomAPI = {
   /**
@@ -10,7 +10,7 @@ export const mockZoomAPI = {
    * Handles both OAuth token call and message send
    */
   mockSendMessage: (messageId: string = 'msg_123') => {
-    const postSpy = jest.spyOn(axios, 'post');
+    const postSpy = jest.spyOn(httpClient, 'post');
 
     // First call: OAuth token
     postSpy.mockResolvedValueOnce({
@@ -38,7 +38,7 @@ export const mockZoomAPI = {
    */
   mockUpdateMessage: () => {
     // Mock OAuth token call
-    jest.spyOn(axios, 'post').mockResolvedValueOnce({
+    jest.spyOn(httpClient, 'post').mockResolvedValueOnce({
       data: {
         access_token: 'mock_token_12345',
         token_type: 'bearer',
@@ -49,7 +49,7 @@ export const mockZoomAPI = {
     });
 
     // Mock message update
-    const putSpy = jest.spyOn(axios, 'put').mockResolvedValueOnce({
+    const putSpy = jest.spyOn(httpClient, 'put').mockResolvedValueOnce({
       data: { success: true },
       status: 200,
     });
@@ -61,7 +61,7 @@ export const mockZoomAPI = {
    * Mock OAuth token response only
    */
   mockGetToken: (token: string = 'mock_token_12345') => {
-    return jest.spyOn(axios, 'post').mockResolvedValue({
+    return jest.spyOn(httpClient, 'post').mockResolvedValue({
       data: {
         access_token: token,
         token_type: 'bearer',
@@ -76,7 +76,7 @@ export const mockZoomAPI = {
    * Mock API error for message sending
    */
   mockAPIError: (status: number, message: string) => {
-    const postSpy = jest.spyOn(axios, 'post');
+    const postSpy = jest.spyOn(httpClient, 'post');
 
     // First call: OAuth token succeeds
     postSpy.mockResolvedValueOnce({
@@ -106,7 +106,7 @@ export const mockZoomAPI = {
    */
   mockUpdateError: (status: number, message: string) => {
     // OAuth token succeeds
-    jest.spyOn(axios, 'post').mockResolvedValueOnce({
+    jest.spyOn(httpClient, 'post').mockResolvedValueOnce({
       data: {
         access_token: 'mock_token_12345',
         token_type: 'bearer',
@@ -117,7 +117,7 @@ export const mockZoomAPI = {
     });
 
     // Update fails
-    const putSpy = jest.spyOn(axios, 'put').mockRejectedValueOnce({
+    const putSpy = jest.spyOn(httpClient, 'put').mockRejectedValueOnce({
       response: {
         status,
         data: { message },

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpClient } from './http-client';
 import { config } from '../config';
 import { ZoomTokenResponse, CachedBotToken } from '../types';
 
@@ -22,7 +22,7 @@ export async function getBotToken(): Promise<string> {
     `${config.zoom.clientId}:${config.zoom.clientSecret}`
   ).toString('base64');
 
-  const response = await axios.post<ZoomTokenResponse>(
+  const response = await httpClient.post<ZoomTokenResponse>(
     `${config.zoom.oauthHost}/oauth/token?grant_type=client_credentials`,
     {},
     {
@@ -61,7 +61,7 @@ export async function exchangeCodeForTokens(
   tokenParams.set('redirect_uri', config.zoom.redirectUri);
   tokenParams.set('code', code);
 
-  const response = await axios.post<ZoomTokenResponse>(
+  const response = await httpClient.post<ZoomTokenResponse>(
     `${config.zoom.oauthHost}/oauth/token`,
     tokenParams.toString(),
     {
@@ -90,7 +90,7 @@ export async function refreshUserToken(
   tokenParams.set('grant_type', 'refresh_token');
   tokenParams.set('refresh_token', refreshToken);
 
-  const response = await axios.post<ZoomTokenResponse>(
+  const response = await httpClient.post<ZoomTokenResponse>(
     `${config.zoom.oauthHost}/oauth/token`,
     tokenParams.toString(),
     {

@@ -2,11 +2,13 @@
  * Utility functions for Poker Planner
  */
 
+import { randomBytes } from 'crypto';
+
 /**
- * Generate a unique session ID
+ * Generate a cryptographically secure unique session ID
  */
 export function generateId(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `session_${Date.now()}_${randomBytes(12).toString('hex')}`;
 }
 
 /**
