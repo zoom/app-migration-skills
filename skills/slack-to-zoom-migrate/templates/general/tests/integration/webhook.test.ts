@@ -3,9 +3,35 @@
  */
 
 import { Request, Response } from 'express';
+import crypto from 'crypto';
 import { handleWebhook } from '../../src/zoom/webhook';
 import { mockZoomAPI, createMockWebhookPayload } from '../helpers/mocks';
 import { setTestEnv, cleanupTestEnv, testUsers, testChannels } from '../helpers/fixtures';
+
+/**
+ * Helper function to create a properly signed webhook request
+ * This ensures webhook signature verification tests pass
+ */
+function createSignedWebhookRequest(payload: any): Partial<Request> {
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const rawBody = JSON.stringify(payload);
+
+  // Generate valid HMAC signature
+  const message = `v0:${timestamp}:${rawBody}`;
+  const hash = crypto
+    .createHmac('sha256', process.env.ZOOM_WEBHOOK_SECRET_TOKEN || 'dev_webhook_secret')
+    .update(message)
+    .digest('hex');
+
+  return {
+    body: payload,
+    headers: {
+      'x-zm-signature': `v0=${hash}`,
+      'x-zm-request-timestamp': timestamp,
+    } as any,
+    rawBody: rawBody,
+  } as any;
+}
 
 describe('Webhook Handler', () => {
   let mockReq: Partial<Request>;
@@ -58,14 +84,14 @@ describe('Webhook Handler', () => {
 
   describe('Bot Notification (Slash Commands)', () => {
     it('should handle bot_notification event', async () => {
-      mockReq = {
-        body: createMockWebhookPayload({
-          cmd: '/test Hello World',
-          userJid: testUsers.user1.jid,
-          userName: testUsers.user1.name,
-          toJid: testChannels.channel1.jid,
-        }),
-      };
+      const payload = createMockWebhookPayload({
+        cmd: '/test Hello World',
+        userJid: testUsers.user1.jid,
+        userName: testUsers.user1.name,
+        toJid: testChannels.channel1.jid,
+      });
+
+      mockReq = createSignedWebhookRequest(payload);
 
       mockZoomAPI.mockSendMessage('msg_123');
 
@@ -76,13 +102,13 @@ describe('Webhook Handler', () => {
     });
 
     it('should process command asynchronously', async () => {
-      mockReq = {
-        body: createMockWebhookPayload({
-          cmd: '/test',
-          userJid: testUsers.user1.jid,
-          userName: testUsers.user1.name,
-        }),
-      };
+      const payload = createMockWebhookPayload({
+        cmd: '/test',
+        userJid: testUsers.user1.jid,
+        userName: testUsers.user1.name,
+      });
+
+      mockReq = createSignedWebhookRequest(payload);
 
       mockZoomAPI.mockSendMessage();
 
@@ -100,21 +126,21 @@ describe('Webhook Handler', () => {
     it('should handle interactive_message_actions event', async () => {
       const actionValue = JSON.stringify({ action: 'test', data: 'value' });
 
-      mockReq = {
-        body: {
-          event: 'interactive_message_actions',
-          payload: {
-            userJid: testUsers.user1.jid,
-            userName: testUsers.user1.name,
-            accountId: 'acc_123',
-            toJid: testChannels.channel1.jid,  // ← Channel where button was clicked
-            actionItem: {
-              text: 'Test Button',
-              value: actionValue,
-            },
+      const payload = {
+        event: 'interactive_message_actions',
+        payload: {
+          userJid: testUsers.user1.jid,
+          userName: testUsers.user1.name,
+          accountId: 'acc_123',
+          toJid: testChannels.channel1.jid,  // ← Channel where button was clicked
+          actionItem: {
+            text: 'Test Button',
+            value: actionValue,
           },
         },
       };
+
+      mockReq = createSignedWebhookRequest(payload);
 
       await handleWebhook(mockReq as Request, mockRes as Response);
 
@@ -126,21 +152,21 @@ describe('Webhook Handler', () => {
       const actionValue = JSON.stringify({ action: 'test', data: 'value' });
       const channelJid = testChannels.channel1.jid;
 
-      mockReq = {
-        body: {
-          event: 'interactive_message_actions',
-          payload: {
-            userJid: testUsers.user1.jid,
-            userName: testUsers.user1.name,
-            accountId: 'acc_123',
-            toJid: channelJid,
-            actionItem: {
-              text: 'Test Button',
-              value: actionValue,
-            },
+      const payload = {
+        event: 'interactive_message_actions',
+        payload: {
+          userJid: testUsers.user1.jid,
+          userName: testUsers.user1.name,
+          accountId: 'acc_123',
+          toJid: channelJid,
+          actionItem: {
+            text: 'Test Button',
+            value: actionValue,
           },
         },
       };
+
+      mockReq = createSignedWebhookRequest(payload);
 
       await handleWebhook(mockReq as Request, mockRes as Response);
 
@@ -157,12 +183,12 @@ describe('Webhook Handler', () => {
 
   describe('Bot Installed Event', () => {
     it('should handle bot_installed event', async () => {
-      mockReq = {
-        body: {
-          event: 'bot_installed',
-          payload: {},
-        },
+      const payload = {
+        event: 'bot_installed',
+        payload: {},
       };
+
+      mockReq = createSignedWebhookRequest(payload);
 
       await handleWebhook(mockReq as Request, mockRes as Response);
 
@@ -172,12 +198,12 @@ describe('Webhook Handler', () => {
 
   describe('App Deauthorized Event', () => {
     it('should handle app_deauthorized event', async () => {
-      mockReq = {
-        body: {
-          event: 'app_deauthorized',
-          payload: {},
-        },
+      const payload = {
+        event: 'app_deauthorized',
+        payload: {},
       };
+
+      mockReq = createSignedWebhookRequest(payload);
 
       await handleWebhook(mockReq as Request, mockRes as Response);
 
@@ -187,12 +213,12 @@ describe('Webhook Handler', () => {
 
   describe('Unknown Events', () => {
     it('should handle unknown event types', async () => {
-      mockReq = {
-        body: {
-          event: 'unknown_event',
-          payload: {},
-        },
+      const payload = {
+        event: 'unknown_event',
+        payload: {},
       };
+
+      mockReq = createSignedWebhookRequest(payload);
 
       await handleWebhook(mockReq as Request, mockRes as Response);
 
