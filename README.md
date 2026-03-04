@@ -416,7 +416,7 @@ Note: Option 2 installations automatically reflect updates via symbolic link on 
 
 Licensed under the MIT License. See [LICENSE](LICENSE) file for complete terms.
 
-Copyright (c) 2025 Zoom Video Communications, Inc.
+Copyright (c) 2026 Zoom Video Communications, Inc.
 
 ---
 
