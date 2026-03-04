@@ -1,35 +1,34 @@
 # Slack-to-Zoom Migration Skill
 
-Migrate Slack apps to Zoom Team Chat with intelligent API mapping and working code generation.
+An automated migration tool for converting Slack applications to Zoom Team Chat with intelligent API mapping and code generation.
 
-**What it does:**
-- 🔍 Analyzes Slack app structure and APIs
-- 🗺️ Maps Slack APIs to Zoom equivalents (110+ API mappings)
-- 💻 Generates working TypeScript/Node.js code with implemented handlers
-- 🔧 Includes automatic error recovery for common issues
-- 📊 Calculates feature parity (70-90% typical)
-- 📚 Creates comprehensive documentation
+## Overview
 
----
+This skill provides comprehensive migration capabilities for transforming Slack applications into Zoom Team Chat applications:
 
-## 📋 Prerequisites
+- **Automated Analysis**: Examines Slack application structure and API usage patterns
+- **Comprehensive API Mapping**: Converts 110+ Slack API calls to Zoom equivalents
+- **Code Generation**: Produces production-ready TypeScript/Node.js code with implemented handlers
+- **Error Recovery**: Includes automatic validation and error correction mechanisms
+- **Feature Parity Analysis**: Calculates migration completeness (typically 80-95%)
+- **Complete Documentation**: Generates setup guides, migration reports, and API documentation
 
-Before installing, make sure you have:
+## Prerequisites
+
+The following tools and accounts are required:
 
 - **Claude Code CLI** - [Install from Anthropic](https://claude.ai/download)
-- **Git** - For cloning this repository
-- **Node.js v16+** - For running generated Zoom apps
-- **Zoom Developer Account** - [Create one here](https://marketplace.zoom.us)
+- **Git** - Version control system for repository management
+- **Node.js v16+** - Runtime environment for generated Zoom applications
+- **Zoom Developer Account** - Register at [marketplace.zoom.us](https://marketplace.zoom.us)
 
----
+## Installation
 
-## 🚀 Installation
+### Option 1: Direct Usage via Plugin Directory
 
-### Option 1: No Installation Required (Easiest) ⭐
+This method allows usage without permanent installation by specifying the plugin directory path at runtime.
 
-Clone once, use anywhere with the `--plugin-dir` flag:
-
-**Step 1: Clone this repository**
+**Step 1: Clone the repository**
 ```bash
 # Option A: SSH (if you have SSH key configured)
 git clone git@github.com:zoom/app-migration-skill.git
@@ -40,29 +39,27 @@ git clone https://github.com/zoom/app-migration-skill.git
 cd app-migration-skill
 ```
 
-**Step 2: Note the full path**
+**Step 2: Record the installation path**
 ```bash
 pwd
 # Example output: /Users/yourname/projects/app-migration-skill
 ```
 
-**Step 3: Use it in any project**
+**Step 3: Launch with plugin directory flag**
 ```bash
 cd your-project
 
-# Replace /Users/yourname/projects/app-migration-skill with YOUR path from step 2
+# Replace with your actual path from Step 2
 claude --plugin-dir /Users/yourname/projects/app-migration-skill/skills/slack-to-zoom-migrate
 ```
 
-**When to use:** Quick start, occasional use, testing, or multi-machine setup.
+**Recommended for**: Initial evaluation, temporary usage, testing environments, or multi-system deployments.
 
----
+### Option 2: Global Installation (Recommended)
 
-### Option 2: Install Globally (Recommended for Frequent Use)
+Permanent installation via symbolic link for streamlined access:
 
-One-time setup for permanent installation:
-
-**Step 1: Clone and navigate**
+**Step 1: Clone the repository**
 ```bash
 # Option A: SSH (if you have SSH key configured)
 git clone git@github.com:zoom/app-migration-skill.git
@@ -73,145 +70,139 @@ git clone https://github.com/zoom/app-migration-skill.git
 cd app-migration-skill
 ```
 
-**Step 2: Create symlink**
+**Step 2: Create symbolic link**
 ```bash
-# Ensure the skills directory exists
+# Initialize skills directory
 mkdir -p ~/.claude/skills
 
-# Create the symlink
+# Create symbolic link to skill
 ln -s "$(pwd)/skills/slack-to-zoom-migrate" ~/.claude/skills/slack-to-zoom-migrate
 ```
 
-**Step 3: Verify**
+**Step 3: Verify installation**
 ```bash
 ls -la ~/.claude/skills/slack-to-zoom-migrate
-# Should show a symlink pointing to your app-migration-skill directory
+# Output should display symlink reference to installation directory
 ```
 
-**Step 4: Use anywhere**
+**Step 4: Launch Claude Code**
 
-Now you can use the skill from any directory without the `--plugin-dir` flag:
+The skill is now available in all Claude Code sessions:
 
 ```bash
 cd any-project
 claude
 ```
 
-Inside Claude, the skill is automatically available.
+**Recommended for**: Production environments, frequent usage, and automatic update propagation.
 
-**When to use:** Daily use, permanent setup, automatic updates.
+## Usage
 
----
+### Launching Claude Code
 
-## 💻 Usage
-
-### Starting Claude
-
-**Option 1 users:**
+**For Option 1 installations:**
 ```bash
 cd your-project
-# Use the actual path from your pwd output (e.g., ~/projects/app-migration-skill)
 claude --plugin-dir ~/projects/app-migration-skill/skills/slack-to-zoom-migrate
 ```
 
-**Option 2 users:**
+**For Option 2 installations:**
 ```bash
 cd your-project
 claude
 ```
 
-### Using the Skill
+### Executing Migration
 
-Once Claude starts, you'll see a prompt. Type the skill command:
+Invoke the skill with the following command syntax:
 
 ```bash
-# Migrate from GitHub
+# Migrate from GitHub repository
 /slack-to-zoom-migrate https://github.com/company/slack-voting-bot
 
-# Migrate from local directory
+# Migrate from local filesystem
 /slack-to-zoom-migrate ./my-slack-app
 ```
 
-### What Happens Next?
+### Migration Process
 
-The skill will:
-1. **Analyze** your Slack app structure and features
-2. **Generate** Zoom Team Chat code with working implementations
-3. **Validate** generated code and apply automatic fixes when needed
-4. **Create** a new directory: `zoom-[app-name]/`
+The skill performs the following operations:
 
-**Generated files:**
+1. **Analysis**: Examines Slack application structure and feature implementation
+2. **Code Generation**: Produces Zoom Team Chat application with functional implementations
+3. **Validation**: Verifies generated code integrity and applies automated corrections
+4. **Output Creation**: Generates project directory: `zoom-[app-name]/`
+
+**Generated project structure:**
 ```
 zoom-voting-bot/
 ├── src/                    # TypeScript source code
-├── package.json            # Dependencies
-├── .env.example            # Configuration template
-├── README.md               # Setup instructions
-└── MIGRATION_GUIDE.md      # Feature parity analysis
+├── package.json            # Dependencies and scripts
+├── .env.example            # Environment configuration template
+├── README.md               # Setup and deployment instructions
+└── MIGRATION_GUIDE.md      # Feature parity analysis report
 ```
 
-**Time:** Several minutes depending on app complexity
+**Processing time**: Varies based on application complexity (typically 2-10 minutes)
 
----
+### Post-Migration Configuration
 
-### After Migration - Next Steps
+After migration completion, configure and deploy the generated Zoom application:
 
-Once migration completes, you'll have a new directory with your Zoom app. The generated code includes working implementations of your Slack app's features.
-
-**Step 1: Install dependencies**
+**Step 1: Install project dependencies**
 ```bash
-cd zoom-voting-bot/  # or whatever your app name is
+cd zoom-voting-bot/  # Navigate to generated project directory
 npm install
 ```
 
-**Step 2: Set up Zoom app credentials**
+**Step 2: Configure Zoom application credentials**
 
-1. Create a Zoom Team Chat app at [marketplace.zoom.us](https://marketplace.zoom.us)
-2. Copy your credentials
-3. Configure your app:
+1. Create a Team Chat application at [Zoom Marketplace](https://marketplace.zoom.us)
+2. Obtain application credentials from the App Credentials page
+3. Configure environment variables:
 
 ```bash
 cp .env.example .env
-# Edit .env with your Zoom credentials:
+# Configure the following credentials in .env:
 # - ZOOM_CLIENT_ID
 # - ZOOM_CLIENT_SECRET
 # - ZOOM_BOT_JID
 ```
 
-**Step 3: Set up public URL (Required for local testing)**
+**Step 3: Configure webhook endpoint (required for local development)**
 
-Zoom needs a public HTTPS URL to send webhook events to your bot. For local development, you need a tunneling service to expose your local port 3000 to the internet.
+Zoom Team Chat requires a publicly accessible HTTPS endpoint for webhook delivery. Local development requires a tunneling service to expose port 3000.
 
-**Option A: ngrok (Easiest)**
+**Option A: ngrok**
 
-ngrok creates a secure tunnel to your localhost.
+Establishes secure tunneling to localhost:
 
 ```bash
-# Install ngrok
+# Install ngrok via Homebrew
 brew install ngrok
-# Or download from: https://ngrok.com/download
+# Or download from https://ngrok.com/download
 
-# Start tunnel to port 3000
+# Initialize tunnel
 ngrok http 3000
 ```
 
-You'll see output like:
+Output displays forwarding URL:
 ```
 Forwarding   https://abc123.ngrok.io -> http://localhost:3000
 ```
 
-Copy the `https://abc123.ngrok.io` URL - this is your public webhook URL.
+Note the HTTPS URL for webhook configuration.
 
 **Option B: frp (Fast Reverse Proxy)**
 
-frp is an alternative if you have your own frp server.
+Alternative tunneling solution for self-hosted proxy servers:
 
 ```bash
 # Install frp client
 brew install frp
-# Or download from: https://github.com/fatedier/frp/releases
+# Or download from https://github.com/fatedier/frp/releases
 
-# Create frpc.ini configuration:
+# Configure frpc.ini:
 [common]
 server_addr = your-frp-server.com
 server_port = 7000
@@ -221,68 +212,62 @@ type = http
 local_port = 3000
 custom_domains = your-subdomain.your-domain.com
 
-# Start frp client
+# Initialize client
 frpc -c frpc.ini
 ```
 
-Your public URL: `https://your-subdomain.your-domain.com`
+Public URL format: `https://your-subdomain.your-domain.com`
 
-**Configure Zoom with your public URL:**
+**Configure Zoom application endpoints:**
 
-1. Go to [Zoom Marketplace](https://marketplace.zoom.us) → Your App → Features
-2. Set **Bot Endpoint URL**: `https://your-url/webhooks/zoom`
-3. Update `.env` → **ZOOM_REDIRECT_URI**: `https://your-url/api/zoomapp/auth`
+1. Navigate to [Zoom Marketplace](https://marketplace.zoom.us) → Your App → Features
+2. Configure **Bot Endpoint URL**: `https://your-url/webhooks/zoom`
+3. Set `.env` variable **ZOOM_REDIRECT_URI**: `https://your-url/api/zoomapp/auth`
 
-**Step 4: Test locally**
+**Step 4: Launch development server**
 ```bash
 npm run dev
 ```
 
-Your bot should now receive webhook events from Zoom!
+The application is now configured to receive Zoom webhook events.
 
-**Step 5: Review and deploy**
+**Step 5: Review documentation and deploy**
 
-See the generated `README.md` and `MIGRATION_GUIDE.md` for:
-- Feature implementation details
-- Deployment instructions
-- Zoom Marketplace setup steps
-- Feature parity analysis
-- Known limitations (if any)
+Consult the generated documentation for complete deployment guidance:
 
----
+- `README.md` - Feature implementation details and deployment procedures
+- `MIGRATION_GUIDE.md` - Feature parity analysis, Marketplace configuration, and known limitations
 
-## ✅ Verify Installation
+## Installation Verification
 
-Check that the skill is loaded correctly:
+Confirm successful skill installation:
 
-**Step 1: Start Claude**
+**Step 1: Launch Claude Code**
 ```bash
 claude
-# or with --plugin-dir flag for Option 1 users
+# Option 1 users: include --plugin-dir flag
 ```
 
-**Step 2: Check available skills**
+**Step 2: Query available skills**
 
-Inside Claude prompt, type:
+Execute the help command:
 ```
 /help
 ```
 
-**Step 3: Look for the skill**
+**Step 3: Verify skill registration**
 
-You should see:
+Expected output:
 ```
 Available skills:
   - slack-to-zoom-migrate: Migrate Slack apps to Zoom Team Chat...
 ```
 
-If you see this, you're all set! ✅
+Presence of this entry confirms successful installation.
 
----
+## Updates
 
-## 🔄 Updates
-
-Both installation options stay in sync with the repository:
+Maintain current version by synchronizing with the repository:
 
 **For all users:**
 ```bash
@@ -290,165 +275,149 @@ cd app-migration-skill
 git pull origin main
 ```
 
-- **Option 1 users:** Next time you start Claude with `--plugin-dir`, it uses the latest version
-- **Option 2 users:** Symlink automatically uses the latest version (no reinstall needed)
+**Installation-specific behavior:**
+- **Option 1**: Updated version applies on next `--plugin-dir` invocation
+- **Option 2**: Symbolic link automatically references updated version
 
----
+## Team Distribution
 
-## 📋 Team Distribution
+**Onboarding documentation for team members:**
 
-**Share this with your team:**
-
-> 🎉 **New: Slack-to-Zoom Migration Skill**
+> **Slack-to-Zoom Migration Skill**
 >
-> **Quick start:**
+> **Quick Start Guide:**
 > ```bash
-> # 1. Clone the repository
+> # 1. Clone repository
 > git clone git@github.com:zoom/app-migration-skill.git
-> # OR: git clone https://github.com/zoom/app-migration-skill.git
+> # Alternative: git clone https://github.com/zoom/app-migration-skill.git
 > cd app-migration-skill
-> pwd  # Note this path
+> pwd  # Record this path
 >
-> # 2. Start Claude with the skill
+> # 2. Launch Claude Code with skill
 > cd your-project
-> claude --plugin-dir /YOUR/NOTED/PATH/skills/slack-to-zoom-migrate
+> claude --plugin-dir /YOUR/RECORDED/PATH/skills/slack-to-zoom-migrate
 >
-> # 3. Use it
+> # 3. Execute migration
 > /slack-to-zoom-migrate https://github.com/yourorg/your-slack-app
 > ```
 >
-> **For permanent install:** See [Option 2 installation](https://github.com/zoom/app-migration-skill#option-2-install-globally-recommended-for-frequent-use)
+> **For permanent installation:** Refer to [Option 2: Global Installation](https://github.com/zoom/app-migration-skill#option-2-global-installation-recommended)
 
----
+## Troubleshooting
 
-## 🆘 Troubleshooting
+### Skill Not Detected
 
-### Skill not found?
+**Option 1 diagnosis:**
 
-**Option 1 troubleshooting:**
-
-Check the path is correct:
+Verify directory path accuracy:
 ```bash
-# Use the actual path from your pwd output
+# Confirm path matches pwd output from installation
 ls ~/projects/app-migration-skill/skills/slack-to-zoom-migrate
-# Should show: skill.json, SKILL.md, executor.md, etc.
+# Expected contents: skill.json, SKILL.md, executor.md
 ```
 
-If not found, run `pwd` in the za-plans directory to get the correct path.
+If files are not present, re-execute `pwd` in the installation directory to obtain the correct path.
 
-**Option 2 troubleshooting:**
+**Option 2 diagnosis:**
 
-Check symlink exists:
+Verify symbolic link integrity:
 ```bash
 ls -la ~/.claude/skills/slack-to-zoom-migrate
-# Should show a symlink (->)
+# Expected output: symbolic link indicator (->)
 ```
 
-If broken or missing, recreate it:
+If missing or invalid, recreate the symbolic link:
 ```bash
-# Navigate to your app-migration-skill directory
-cd ~/projects/app-migration-skill  # adjust path as needed
+# Navigate to installation directory
+cd ~/projects/app-migration-skill  # Adjust path as needed
 
-# Ensure the skills directory exists
+# Initialize skills directory
 mkdir -p ~/.claude/skills
 
-# Recreate the symlink
+# Create symbolic link
 ln -s "$(pwd)/skills/slack-to-zoom-migrate" ~/.claude/skills/slack-to-zoom-migrate
 ```
 
----
+### Permission Issues
 
-### Permission errors?
-
-Fix file permissions:
+Correct file permissions:
 ```bash
-# Use your actual path
 chmod -R 755 ~/projects/app-migration-skill/skills/slack-to-zoom-migrate
 ```
 
----
+### Claude Code Launch Failure
 
-### Claude doesn't start?
-
-Make sure Claude Code CLI is installed:
+Verify CLI installation:
 ```bash
 claude --version
 ```
 
-If not found, [install Claude Code](https://claude.ai/download).
+If command not found, install from [claude.ai/download](https://claude.ai/download).
 
----
+### Additional Support
 
-### Still having issues?
+For persistent issues:
 
-Ask Claude directly (if Claude starts):
-```
-Check if the slack-to-zoom-migrate skill is properly set up
-```
+1. Query Claude Code directly (if accessible):
+   ```
+   Check if the slack-to-zoom-migrate skill is properly set up
+   ```
 
-Or open an issue on [GitHub](https://github.com/zoom/app-migration-skill/issues).
+2. Submit issue report at [GitHub Issues](https://github.com/zoom/app-migration-skill/issues)
 
----
-
-## 📂 Repository Structure
+## Repository Structure
 
 ```
 app-migration-skill/
-├── README.md                      # This file
+├── README.md                      # Project documentation
 └── skills/
-    └── slack-to-zoom-migrate/     # Main skill
-        ├── skill.json             # Skill metadata
-        ├── SKILL.md               # Skill instructions
-        ├── executor.md            # Execution flow
-        ├── docs/                  # 110+ API links
-        │   ├── API_MAPPING_REFERENCE.md
-        │   ├── ZOOM_DOCS_DIRECTORY.md
-        │   ├── SLACK_DOCS_DIRECTORY.md
-        │   └── code-examples/     # 8 working examples
+    └── slack-to-zoom-migrate/     # Primary skill implementation
+        ├── skill.json             # Skill metadata and configuration
+        ├── SKILL.md               # Skill implementation instructions
+        ├── executor.md            # Execution workflow documentation
+        ├── docs/                  # API reference documentation
+        │   ├── API_MAPPING_REFERENCE.md     # 110+ API mappings
+        │   ├── ZOOM_DOCS_DIRECTORY.md       # Zoom API documentation
+        │   ├── SLACK_DOCS_DIRECTORY.md      # Slack API documentation
+        │   └── code-examples/               # Implementation examples
         └── templates/
             └── general/           # Code generation templates
 ```
 
----
+## Contributing
 
-## 🤝 Contributing
+Contributions are welcomed through the standard fork and pull request workflow:
 
-Contributions are welcome! To contribute:
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/feature-name`
+3. Implement changes in `skills/slack-to-zoom-migrate/`
+4. Validate with multiple Slack application migrations
+5. Commit changes: `git commit -m 'Add feature description'`
+6. Push to branch: `git push origin feature/feature-name`
+7. Submit pull request
 
-1. Fork this repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make changes to `skills/slack-to-zoom-migrate/`
-4. Test with various Slack apps
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+Note: Option 2 installations automatically reflect updates via symbolic link on `git pull`.
 
-Users with symlinked installations (Option 2) get updates automatically on `git pull`.
+## Documentation
 
----
-
-## 📚 Documentation
-
-**Skill Documentation:**
-- **[Skill Overview](skills/slack-to-zoom-migrate/SKILL_OVERVIEW.md)** - Quick reference
-- **[API Mapping Reference](skills/slack-to-zoom-migrate/docs/API_MAPPING_REFERENCE.md)** - 50+ API mappings
-- **[Zoom API Directory](skills/slack-to-zoom-migrate/docs/ZOOM_DOCS_DIRECTORY.md)** - 40+ Zoom docs links
-- **[Slack API Directory](skills/slack-to-zoom-migrate/docs/SLACK_DOCS_DIRECTORY.md)** - 70+ Slack docs links
-- **[Code Examples](skills/slack-to-zoom-migrate/docs/code-examples/)** - 8 working examples
+**Internal Documentation:**
+- [Skill Overview](skills/slack-to-zoom-migrate/SKILL_OVERVIEW.md) - Quick reference guide
+- [API Mapping Reference](skills/slack-to-zoom-migrate/docs/API_MAPPING_REFERENCE.md) - 50+ API mappings
+- [Zoom API Directory](skills/slack-to-zoom-migrate/docs/ZOOM_DOCS_DIRECTORY.md) - 40+ documentation links
+- [Slack API Directory](skills/slack-to-zoom-migrate/docs/SLACK_DOCS_DIRECTORY.md) - 70+ documentation links
+- [Code Examples](skills/slack-to-zoom-migrate/docs/code-examples/) - 8 implementation examples
 
 **External Resources:**
-- [Zoom Team Chat API](https://developers.zoom.us/docs/team-chat/)
+- [Zoom Team Chat API Documentation](https://developers.zoom.us/docs/team-chat/)
 - [Zoom App Marketplace](https://marketplace.zoom.us)
 - [Slack API Documentation](https://api.slack.com/)
 
----
+## License
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Licensed under the MIT License. See [LICENSE](LICENSE) file for complete terms.
 
 Copyright (c) 2025 Zoom Video Communications, Inc.
 
 ---
 
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-03-03
