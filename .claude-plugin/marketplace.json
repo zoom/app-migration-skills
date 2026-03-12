@@ -1,0 +1,23 @@
+{
+  "name": "app-migration-skills",
+  "owner": {
+    "name": "Zoom Apps",
+    "email": "zoomapps.developer@app.zoom.us"
+  },
+  "metadata": {
+    "description": "A collection of Claude Code skills for migrating apps to the Zoom platform",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "slack-to-zoom",
+      "source": "./skills/slack-to-zoom-migrate",
+      "description": "Migrate Slack apps to Zoom Team Chat with intelligent API mapping and working code generation"
+    },
+    {
+      "name": "zoom-chat-app-boilerplate",
+      "source": "./skills/zoom-chat-app-boilerplate",
+      "description": "Generate a production-ready Zoom Team Chat app boilerplate"
+    }
+  ]
+}
