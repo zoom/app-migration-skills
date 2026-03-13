@@ -96,6 +96,46 @@ claude
 
 **Recommended for**: Production environments, frequent usage, and automatic update propagation.
 
+### Option 3: Marketplace Plugin Installation
+
+Install directly via the Claude Code plugin marketplace using the repository's `.claude-plugin/marketplace.json` configuration. Run these commands from within any Claude Code session.
+
+**Step 1: Clone the repository**
+```bash
+git clone git@github.com:zoom/app-migration-skill.git
+# Alternative: git clone https://github.com/zoom/app-migration-skill.git
+
+cd app-migration-skill
+pwd
+# Example output: /Users/yourname/projects/app-migration-skill
+```
+
+**Step 2: Register the marketplace**
+
+Use the absolute path from Step 1:
+```
+/plugin marketplace add /Users/yourname/projects/app-migration-skill
+```
+
+**Step 3: Install the plugin**
+```
+/plugin install slack-to-zoom@app-migration-skills
+```
+
+This makes the following skills available:
+- `slack-to-zoom` — Migrate Slack apps to Zoom Team Chat
+- `zoom-chat-app-boilerplate` — Generate a production-ready Zoom Team Chat app boilerplate
+
+Alternatively, use the interactive UI — run `/plugin`, navigate to **Marketplaces** and enter the absolute path (e.g. `/Users/yourname/projects/app-migration-skill`), then **Discover** to browse and install.
+
+**Step 4: Verify installation**
+```
+/help
+# Expected: slack-to-zoom-migrate listed under available skills
+```
+
+**Recommended for**: Teams that want a single-command setup or when distributing to multiple developers without manual cloning or symlink management.
+
 ## Usage
 
 ### Launching Claude Code
@@ -107,6 +147,12 @@ claude --plugin-dir ~/projects/app-migration-skill/skills/slack-to-zoom-migrate
 ```
 
 **For Option 2 installations:**
+```bash
+cd your-project
+claude
+```
+
+**For Option 3 installations:**
 ```bash
 cd your-project
 claude
@@ -246,6 +292,7 @@ Confirm successful skill installation:
 ```bash
 claude
 # Option 1 users: include --plugin-dir flag
+# Option 3 users: no flags needed after installation
 ```
 
 **Step 2: Query available skills**
@@ -278,6 +325,7 @@ git pull origin main
 **Installation-specific behavior:**
 - **Option 1**: Updated version applies on next `--plugin-dir` invocation
 - **Option 2**: Symbolic link automatically references updated version
+- **Option 3**: Re-run `/plugin install slack-to-zoom@app-migration-skills` inside Claude Code to update to the latest version
 
 ## Team Distribution
 
@@ -301,7 +349,7 @@ git pull origin main
 > /slack-to-zoom-migrate https://github.com/yourorg/your-slack-app
 > ```
 >
-> **For permanent installation:** Refer to [Option 2: Global Installation](https://github.com/zoom/app-migration-skill#option-2-global-installation-recommended)
+> **For permanent installation:** Refer to [Option 2: Global Installation](https://github.com/zoom/app-migration-skill#option-2-global-installation-recommended) or [Option 3: Marketplace Plugin Installation](https://github.com/zoom/app-migration-skill#option-3-marketplace-plugin-installation)
 
 ## Troubleshooting
 
@@ -338,6 +386,14 @@ mkdir -p ~/.claude/skills
 ln -s "$(pwd)/skills/slack-to-zoom-migrate" ~/.claude/skills/slack-to-zoom-migrate
 ```
 
+**Option 3 diagnosis:**
+
+Re-register and reinstall from within Claude Code using the absolute path to the cloned repo:
+```
+/plugin marketplace add /Users/yourname/projects/app-migration-skill
+/plugin install slack-to-zoom@app-migration-skills
+```
+
 ### Permission Issues
 
 Correct file permissions:
@@ -369,19 +425,39 @@ For persistent issues:
 
 ```
 app-migration-skill/
+├── .claude-plugin/
+│   └── marketplace.json           # Plugin marketplace configuration
 ├── README.md                      # Project documentation
 └── skills/
     └── slack-to-zoom-migrate/     # Primary skill implementation
-        ├── skill.json             # Skill metadata and configuration
         ├── SKILL.md               # Skill implementation instructions
-        ├── executor.md            # Execution workflow documentation
+        ├── README.md              # Skill-level documentation
+        ├── commands/              # Slash command definitions
+        │   └── slack-to-zoom-migrate.md
+        ├── core/                  # Core execution logic
+        │   ├── executor.md        # Execution workflow
+        │   └── instructions.md   # Detailed migration instructions
         ├── docs/                  # API reference documentation
         │   ├── API_MAPPING_REFERENCE.md     # 110+ API mappings
-        │   ├── ZOOM_DOCS_DIRECTORY.md       # Zoom API documentation
+        │   ├── api-mapping/                 # Granular API mapping docs
+        │   │   ├── events-webhooks.md
+        │   │   ├── formatting.md
+        │   │   ├── interactivity.md
+        │   │   ├── messaging-api.md
+        │   │   ├── oauth-auth.md
+        │   │   └── slash-commands.md
+        │   ├── ZOOM_OFFICIAL_DOCS.md        # Zoom API documentation
         │   ├── SLACK_DOCS_DIRECTORY.md      # Slack API documentation
         │   └── code-examples/               # Implementation examples
-        └── templates/
-            └── general/           # Code generation templates
+        ├── examples/              # Example migrated applications
+        │   └── poker-planner-zoom/          # Full example migration
+        ├── reference/             # Quick reference materials
+        │   ├── COMMON_BUGS.md
+        │   ├── FAQ.md
+        │   ├── QUICK_REFERENCE.md
+        │   └── VALIDATION_EXAMPLES.md
+        └── templates/             # Code generation templates
+            └── general/           # Base project template
 ```
 
 ## Contributing
@@ -420,4 +496,4 @@ Copyright (c) 2026 Zoom Video Communications, Inc.
 
 ---
 
-**Last Updated:** 2026-03-03
+**Last Updated:** 2026-03-12
