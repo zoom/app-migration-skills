@@ -31,18 +31,18 @@ This method allows usage without permanent installation by specifying the plugin
 **Step 1: Clone the repository**
 ```bash
 # Option A: SSH (if you have SSH key configured)
-git clone git@github.com:zoom/app-migration-skill.git
+git clone git@github.com:zoom/app-migration-skills.git
 
 # Option B: HTTPS
-git clone https://github.com/zoom/app-migration-skill.git
+git clone https://github.com/zoom/app-migration-skills.git
 
-cd app-migration-skill
+cd app-migration-skills
 ```
 
 **Step 2: Record the installation path**
 ```bash
 pwd
-# Example output: /Users/yourname/projects/app-migration-skill
+# Example output: /Users/yourname/projects/app-migration-skills
 ```
 
 **Step 3: Launch with plugin directory flag**
@@ -50,7 +50,7 @@ pwd
 cd your-project
 
 # Replace with your actual path from Step 2
-claude --plugin-dir /Users/yourname/projects/app-migration-skill/skills/slack-to-zoom-migrate
+claude --plugin-dir /Users/yourname/projects/app-migration-skills/skills/slack-to-zoom-migrate
 ```
 
 **Recommended for**: Initial evaluation, temporary usage, testing environments, or multi-system deployments.
@@ -62,12 +62,12 @@ Permanent installation via symbolic link for streamlined access:
 **Step 1: Clone the repository**
 ```bash
 # Option A: SSH (if you have SSH key configured)
-git clone git@github.com:zoom/app-migration-skill.git
+git clone git@github.com:zoom/app-migration-skills.git
 
 # Option B: HTTPS
-git clone https://github.com/zoom/app-migration-skill.git
+git clone https://github.com/zoom/app-migration-skills.git
 
-cd app-migration-skill
+cd app-migration-skills
 ```
 
 **Step 2: Create symbolic link**
@@ -102,19 +102,19 @@ Install directly via the Claude Code plugin marketplace using the repository's `
 
 **Step 1: Clone the repository**
 ```bash
-git clone git@github.com:zoom/app-migration-skill.git
-# Alternative: git clone https://github.com/zoom/app-migration-skill.git
+git clone git@github.com:zoom/app-migration-skills.git
+# Alternative: git clone https://github.com/zoom/app-migration-skills.git
 
-cd app-migration-skill
+cd app-migration-skills
 pwd
-# Example output: /Users/yourname/projects/app-migration-skill
+# Example output: /Users/yourname/projects/app-migration-skills
 ```
 
 **Step 2: Register the marketplace**
 
 Use the absolute path from Step 1:
 ```
-/plugin marketplace add /Users/yourname/projects/app-migration-skill
+/plugin marketplace add /Users/yourname/projects/app-migration-skills
 ```
 
 **Step 3: Install the plugin**
@@ -126,7 +126,7 @@ This makes the following skills available:
 - `slack-to-zoom` — Migrate Slack apps to Zoom Team Chat
 - `zoom-chat-app-boilerplate` — Generate a production-ready Zoom Team Chat app boilerplate
 
-Alternatively, use the interactive UI — run `/plugin`, navigate to **Marketplaces** and enter the absolute path (e.g. `/Users/yourname/projects/app-migration-skill`), then **Discover** to browse and install.
+Alternatively, use the interactive UI — run `/plugin`, navigate to **Marketplaces** and enter the absolute path (e.g. `/Users/yourname/projects/app-migration-skills`), then **Discover** to browse and install.
 
 **Step 4: Verify installation**
 ```
@@ -143,7 +143,7 @@ Alternatively, use the interactive UI — run `/plugin`, navigate to **Marketpla
 **For Option 1 installations:**
 ```bash
 cd your-project
-claude --plugin-dir ~/projects/app-migration-skill/skills/slack-to-zoom-migrate
+claude --plugin-dir ~/projects/app-migration-skills/skills/slack-to-zoom-migrate
 ```
 
 **For Option 2 installations:**
@@ -318,7 +318,7 @@ Maintain current version by synchronizing with the repository:
 
 **For all users:**
 ```bash
-cd app-migration-skill
+cd app-migration-skills
 git pull origin main
 ```
 
@@ -336,9 +336,9 @@ git pull origin main
 > **Quick Start Guide:**
 > ```bash
 > # 1. Clone repository
-> git clone git@github.com:zoom/app-migration-skill.git
-> # Alternative: git clone https://github.com/zoom/app-migration-skill.git
-> cd app-migration-skill
+> git clone git@github.com:zoom/app-migration-skills.git
+> # Alternative: git clone https://github.com/zoom/app-migration-skills.git
+> cd app-migration-skills
 > pwd  # Record this path
 >
 > # 2. Launch Claude Code with skill
@@ -349,7 +349,7 @@ git pull origin main
 > /slack-to-zoom-migrate https://github.com/yourorg/your-slack-app
 > ```
 >
-> **For permanent installation:** Refer to [Option 2: Global Installation](https://github.com/zoom/app-migration-skill#option-2-global-installation-recommended) or [Option 3: Marketplace Plugin Installation](https://github.com/zoom/app-migration-skill#option-3-marketplace-plugin-installation)
+> **For permanent installation:** Refer to [Option 2: Global Installation](https://github.com/zoom/app-migration-skills#option-2-global-installation-recommended) or [Option 3: Marketplace Plugin Installation](https://github.com/zoom/app-migration-skills#option-3-marketplace-plugin-installation)
 
 ## Troubleshooting
 
@@ -360,7 +360,7 @@ git pull origin main
 Verify directory path accuracy:
 ```bash
 # Confirm path matches pwd output from installation
-ls ~/projects/app-migration-skill/skills/slack-to-zoom-migrate
+ls ~/projects/app-migration-skills/skills/slack-to-zoom-migrate
 # Expected contents: skill.json, SKILL.md, executor.md
 ```
 
@@ -377,7 +377,7 @@ ls -la ~/.claude/skills/slack-to-zoom-migrate
 If missing or invalid, recreate the symbolic link:
 ```bash
 # Navigate to installation directory
-cd ~/projects/app-migration-skill  # Adjust path as needed
+cd ~/projects/app-migration-skills  # Adjust path as needed
 
 # Initialize skills directory
 mkdir -p ~/.claude/skills
@@ -390,7 +390,7 @@ ln -s "$(pwd)/skills/slack-to-zoom-migrate" ~/.claude/skills/slack-to-zoom-migra
 
 Re-register and reinstall from within Claude Code using the absolute path to the cloned repo:
 ```
-/plugin marketplace add /Users/yourname/projects/app-migration-skill
+/plugin marketplace add /Users/yourname/projects/app-migration-skills
 /plugin install slack-to-zoom@app-migration-skills
 ```
 
@@ -398,7 +398,7 @@ Re-register and reinstall from within Claude Code using the absolute path to the
 
 Correct file permissions:
 ```bash
-chmod -R 755 ~/projects/app-migration-skill/skills/slack-to-zoom-migrate
+chmod -R 755 ~/projects/app-migration-skills/skills/slack-to-zoom-migrate
 ```
 
 ### Claude Code Launch Failure
@@ -419,12 +419,12 @@ For persistent issues:
    Check if the slack-to-zoom-migrate skill is properly set up
    ```
 
-2. Submit issue report at [GitHub Issues](https://github.com/zoom/app-migration-skill/issues)
+2. Submit issue report at [GitHub Issues](https://github.com/zoom/app-migration-skills/issues)
 
 ## Repository Structure
 
 ```
-app-migration-skill/
+app-migration-skills/
 ├── .claude-plugin/
 │   └── marketplace.json           # Plugin marketplace configuration
 ├── README.md                      # Project documentation
