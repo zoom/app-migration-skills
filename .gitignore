@@ -1,0 +1,10 @@
+.claude
+# IDE files
+.idea/
+# Node modules in templates (should not be committed)
+node_modules/
+package-lock.json
+# Temp files
+.temp-backup/
+.DS_Store
+*.log
