@@ -247,7 +247,7 @@ if (body.event === 'bot_notification') {
 
 ```bash
 # Run skill (includes automatic validation)
-/slack-to-zoom-migrate https://github.com/user/slack-bot
+/stz:migrate https://github.com/user/slack-bot
 
 # Test bot locally
 cd ~/generated-bot

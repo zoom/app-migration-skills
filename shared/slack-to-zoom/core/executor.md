@@ -1,5 +1,20 @@
 # Slack-to-Zoom Migration Skill Executor
 
+## Stage Model
+
+This workflow can be executed as six explicit stages:
+
+1. Discover: `../stages/01-discover.md`
+2. Map: `../stages/02-map.md`
+3. Generate: `../stages/03-generate.md`
+4. Document: `../stages/04-document.md`
+5. Validate: `../stages/05-validate.md`
+6. Handoff: `../stages/06-handoff.md`
+
+Runtime wrappers can either:
+- run the full end-to-end workflow in one command
+- expose stage-specific commands or prompts that execute one stage at a time
+
 ## ⚠️ CRITICAL GUIDELINES FOR CLAUDE ⚠️
 
 *READ THIS BEFORE EXECUTING THE SKILL:*
@@ -268,25 +283,25 @@ If you didn't ask the credential question, GO BACK NOW.
 The user invokes this skill by typing:
 
 ```
-/slack-to-zoom-migrate <github-url-or-path>
+/stz:migrate <github-url-or-path>
 ```
 
 ### Examples:
 
 ```bash
 # Migrate Slack Poker Planner (100% working)
-/slack-to-zoom-migrate https://github.com/dgurkaynak/slack-poker-planner
+/stz:migrate https://github.com/dgurkaynak/slack-poker-planner
 
 # Migrate another Slack app
-/slack-to-zoom-migrate https://github.com/user/my-slack-app
+/stz:migrate https://github.com/user/my-slack-app
 
 # Migrate local Slack app
-/slack-to-zoom-migrate ./my-slack-app
+/stz:migrate ./my-slack-app
 ```
 
 ### What Happens When Invoked:
 
-1. Claude Code recognizes the `/slack-to-zoom-migrate` command
+1. Claude Code recognizes the `/stz:migrate` command
 2. It loads the runtime wrapper and then resolves the shared migration core
 3. Claude follows the execution flow below
 4. Output is generated to `./poker-planner-zoom/` (or similar)
@@ -322,7 +337,7 @@ mkdir -p "$OUTPUT_DIR" || {
 # relative to the wrapper directory.
 WORK_DIR=$(pwd)
 WRAPPER_DIR="<path-to-runtime-wrapper>"
-SHARED_DIR="$WRAPPER_DIR/../../../shared/slack-to-zoom-migrate"
+SHARED_DIR="$WRAPPER_DIR/../../../shared/slack-to-zoom"
 
 # Example: Verify shared templates exist
 if [ ! -d "$SHARED_DIR/templates/general" ]; then

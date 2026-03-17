@@ -46,11 +46,11 @@ The runtime wrapper needs to know where the shared migration core is located. Us
 ```bash
 # The wrapper should resolve the shared directory relative to itself.
 # Example wrappers:
-#   claude/skills/slack-to-zoom-migrate/
-#   codex/skills/slack-to-zoom-migrate/
+#   claude/skills/slack-to-zoom/
+#   codex/skills/slack-to-zoom/
 
 WRAPPER_DIR="<path-to-runtime-wrapper>"
-SHARED_DIR="$WRAPPER_DIR/../../../shared/slack-to-zoom-migrate"
+SHARED_DIR="$WRAPPER_DIR/../../../shared/slack-to-zoom"
 
 # Verify it exists
 if [ ! -d "$SHARED_DIR/templates" ]; then
@@ -74,7 +74,7 @@ echo "📁 Working directory: $WORK_DIR"
 
 Extract the GitHub URL or local path from the user's command:
 ```
-/slack-to-zoom-migrate <url-or-path>
+/stz:migrate <url-or-path>
 ```
 
 Examples:
@@ -88,7 +88,7 @@ INPUT="$1"
 
 if [ -z "$INPUT" ]; then
   echo "❌ Error: No repository URL or path provided"
-  echo "Usage: /slack-to-zoom-migrate <github-url-or-path>"
+  echo "Usage: /stz:migrate <github-url-or-path>"
   exit 1
 fi
 

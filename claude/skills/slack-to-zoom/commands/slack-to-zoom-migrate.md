@@ -8,7 +8,7 @@ allowed-tools: [Bash, Read, Write, Glob, Grep, Task, AskUserQuestion, Edit]
 
 Automatically migrate Slack apps to Zoom Team Chat with intelligent analysis, API mapping, and production-ready code generation.
 
-This Claude command is a thin wrapper. Shared implementation lives in `../../../shared/slack-to-zoom-migrate/`.
+This Claude command is a legacy thin wrapper. Shared implementation lives in `../../../shared/slack-to-zoom/`.
 
 ## Arguments
 
@@ -31,17 +31,17 @@ When invoked, this command will:
 
 ### GitHub Repository
 ```bash
-/slack-to-zoom-migrate https://github.com/dgurkaynak/slack-poker-planner
+/stz:migrate https://github.com/dgurkaynak/slack-poker-planner
 ```
 
 ### Local Directory
 ```bash
-/slack-to-zoom-migrate ./my-slack-app
+/stz:migrate ./my-slack-app
 ```
 
 ### Another GitHub Example
 ```bash
-/slack-to-zoom-migrate https://github.com/user/custom-slack-bot
+/stz:migrate https://github.com/user/custom-slack-bot
 ```
 
 ## Generated Output
@@ -70,32 +70,32 @@ The command will create a new Zoom app directory with:
 
 ## Execution Flow
 
-The command executes 6 phases:
+The command executes 6 stages:
 
-### Phase 1: Repository Analysis (30-45s)
+### Stage 1: Repository Analysis (30-45s)
 - Clone/read the Slack app source code
 - Identify framework, language, and structure
 - Catalog all features (commands, buttons, events, modals)
 
-### Phase 2: Feature Mapping (30-45s)
+### Stage 2: Feature Mapping (30-45s)
 - Map Slack APIs to Zoom equivalents
 - Calculate feature parity percentage
 - Identify limitations and workarounds
 
-### Phase 3: Code Generation (60-90s)
+### Stage 3: Code Generation (60-90s)
 - Generate complete TypeScript project
 - Apply Zoom-specific fixes
 - Implement business logic
 
-### Phase 4: Documentation (30-45s)
+### Stage 4: Documentation (30-45s)
 - Generate README, migration guide, setup checklist
 
-### Phase 5: Validation (MANDATORY)
+### Stage 5: Validation (MANDATORY)
 - Ask user for Zoom credentials
 - Run npm install and tests
 - Start server and validate endpoints
 
-### Phase 6: Final Summary (5-10s)
+### Stage 6: Final Summary (5-10s)
 - Display comprehensive results
 - Show validation status
 - Provide next steps
@@ -151,7 +151,7 @@ The validation phase is mandatory and will:
 ## Support
 
 For detailed documentation, see:
-- `../../../shared/slack-to-zoom-migrate/core/executor.md` - Detailed execution flow
-- `../../../shared/slack-to-zoom-migrate/docs/API_MAPPING_REFERENCE.md` - Complete API mappings
-- `../../../shared/slack-to-zoom-migrate/docs/RICH_FORMATTING_CHECKLIST.md` - Formatting guidelines
-- `../../../shared/slack-to-zoom-migrate/examples/poker-planner-zoom/` - Working example
+- `../../../shared/slack-to-zoom/core/executor.md` - Detailed execution flow
+- `../../../shared/slack-to-zoom/docs/API_MAPPING_REFERENCE.md` - Complete API mappings
+- `../../../shared/slack-to-zoom/docs/RICH_FORMATTING_CHECKLIST.md` - Formatting guidelines
+- `../../../shared/slack-to-zoom/examples/poker-planner-zoom/` - Working example

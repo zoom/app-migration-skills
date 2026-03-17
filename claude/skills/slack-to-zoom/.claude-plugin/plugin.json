@@ -1,5 +1,5 @@
 {
-  "name": "slack-to-zoom-migrate",
+  "name": "slack-to-zoom",
   "description": "Migrate Slack apps to Zoom Team Chat. Analyzes Slack app code and generates production-ready Zoom chatbot with API mappings and documentation.",
   "author": {
     "name": "Pranav Katariya",
