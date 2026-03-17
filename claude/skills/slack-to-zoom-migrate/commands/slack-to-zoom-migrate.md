@@ -8,6 +8,8 @@ allowed-tools: [Bash, Read, Write, Glob, Grep, Task, AskUserQuestion, Edit]
 
 Automatically migrate Slack apps to Zoom Team Chat with intelligent analysis, API mapping, and production-ready code generation.
 
+This Claude command is a thin wrapper. Shared implementation lives in `../../../shared/slack-to-zoom-migrate/`.
+
 ## Arguments
 
 **Required:** `<github-url-or-path>`
@@ -149,7 +151,7 @@ The validation phase is mandatory and will:
 ## Support
 
 For detailed documentation, see:
-- `core/executor.md` - Detailed execution flow
-- `docs/API_MAPPING_REFERENCE.md` - Complete API mappings
-- `docs/RICH_FORMATTING_CHECKLIST.md` - Formatting guidelines
-- `examples/poker-planner-zoom/` - Working example
+- `../../../shared/slack-to-zoom-migrate/core/executor.md` - Detailed execution flow
+- `../../../shared/slack-to-zoom-migrate/docs/API_MAPPING_REFERENCE.md` - Complete API mappings
+- `../../../shared/slack-to-zoom-migrate/docs/RICH_FORMATTING_CHECKLIST.md` - Formatting guidelines
+- `../../../shared/slack-to-zoom-migrate/examples/poker-planner-zoom/` - Working example

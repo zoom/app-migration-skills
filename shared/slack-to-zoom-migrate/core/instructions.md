@@ -39,26 +39,28 @@ Before proceeding to Phase 6, verify Phase 5 is complete:
 
 ## Step 0: Initialize Environment
 
-### Determine Skill Directory
+### Determine Shared Core Directory
 
-The skill needs to know where its templates are located. Use this pattern:
+The runtime wrapper needs to know where the shared migration core is located. Use this pattern:
 
 ```bash
-# The skill base directory is provided in the system message
-# Look for: "Base directory for this skill: /path/to/skill"
+# The wrapper should resolve the shared directory relative to itself.
+# Example wrappers:
+#   claude/skills/slack-to-zoom-migrate/
+#   codex/skills/slack-to-zoom-migrate/
 
-# Store it for use throughout
-SKILL_DIR="<path-from-system-message>"
+WRAPPER_DIR="<path-to-runtime-wrapper>"
+SHARED_DIR="$WRAPPER_DIR/../../../shared/slack-to-zoom-migrate"
 
 # Verify it exists
-if [ ! -d "$SKILL_DIR/templates" ]; then
-  echo "❌ Error: Skill templates not found"
-  echo "Expected: $SKILL_DIR/templates"
-  echo "This indicates the skill was not properly installed."
+if [ ! -d "$SHARED_DIR/templates" ]; then
+  echo "❌ Error: Shared templates not found"
+  echo "Expected: $SHARED_DIR/templates"
+  echo "This indicates the shared migration core is missing."
   exit 1
 fi
 
-echo "✅ Skill directory: $SKILL_DIR"
+echo "✅ Shared core directory: $SHARED_DIR"
 ```
 
 ### Get Current Working Directory
@@ -163,13 +165,13 @@ Use the Explore agent to analyze the codebase:
 
 ## Step 4: Choose Template
 
-Use the general template from `templates/general/` and adapt based on app features detected
+Use the general template from `templates/general/` inside the shared core and adapt based on app features detected.
 
 ## Step 5: Generate Zoom App
 
 1. **Copy general template**:
    ```bash
-   cp -r templates/general/* <output-directory>/
+   cp -r "$SHARED_DIR/templates/general/"* <output-directory>/
    ```
 
 2. **Generate webhook handlers** based on Slack patterns:

@@ -287,7 +287,7 @@ The user invokes this skill by typing:
 ### What Happens When Invoked:
 
 1. Claude Code recognizes the `/slack-to-zoom-migrate` command
-2. It loads this skill from `/skills/slack-to-zoom-migrate/`
+2. It loads the runtime wrapper and then resolves the shared migration core
 3. Claude follows the execution flow below
 4. Output is generated to `./poker-planner-zoom/` (or similar)
 
@@ -318,15 +318,16 @@ mkdir -p "$OUTPUT_DIR" || {
 
 ### 2. Working Directory Safety
 ```bash
-# When executing, Claude can access skill resources using relative paths
-# from the skill directory (skills/slack-to-zoom-migrate/)
+# When executing, the runtime wrapper should resolve the shared core directory
+# relative to the wrapper directory.
 WORK_DIR=$(pwd)
+WRAPPER_DIR="<path-to-runtime-wrapper>"
+SHARED_DIR="$WRAPPER_DIR/../../../shared/slack-to-zoom-migrate"
 
-# Example: Verify templates exist relative to skill directory
-# The skill accesses: skills/slack-to-zoom-migrate/templates/general/
-if [ ! -d "templates/general" ]; then
-  echo "❌ Error: Templates not found at templates/general"
-  echo "This skill requires templates to be present in the skill directory."
+# Example: Verify shared templates exist
+if [ ! -d "$SHARED_DIR/templates/general" ]; then
+  echo "❌ Error: Templates not found at $SHARED_DIR/templates/general"
+  echo "This skill requires the shared migration core."
   exit 1
 fi
 ```
@@ -364,7 +365,7 @@ cd "$OUTPUT_DIR" || exit 1
 [ -f "package.json" ] && echo "Found package.json"
 
 # ✅ Good: Use absolute paths
-cp -r "$SKILL_DIR/templates/general/"* "$OUTPUT_DIR/"
+cp -r "$SHARED_DIR/templates/general/"* "$OUTPUT_DIR/"
 
 # ❌ Bad: Assume directory exists
 cd poker-planner-zoom  # WILL FAIL if not in right location
@@ -802,7 +803,7 @@ Combine all analysis into a comprehensive map:
 ```bash
 # Always use general template - it's flexible and works for all apps
 echo "[Internal] Using general template"
-TEMPLATE_DIR="$SKILL_DIR/templates/general"
+TEMPLATE_DIR="$SHARED_DIR/templates/general"
 
 # Adjust expected parity based on app complexity
 DETECTED_PATTERN=$(detect_app_pattern "$SOURCE_DIR")
@@ -922,7 +923,7 @@ Actually create these files in the output directory.
 if [ -d "$TEMPLATE_DIR" ]; then
   cp -r "$TEMPLATE_DIR/"* "$OUTPUT_DIR/"
 else
-  cp -r "$SKILL_DIR/templates/general/"* "$OUTPUT_DIR/"
+  cp -r "$SHARED_DIR/templates/general/"* "$OUTPUT_DIR/"
 fi
 ```
 
