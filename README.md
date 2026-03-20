@@ -65,17 +65,16 @@ Use `migrate` as the default entrypoint. Use the other stages when you want to r
 ```bash
 git clone git@github.com:zoom/app-migration-skills.git
 cd app-migration-skills
-/plugin marketplace add "$(pwd)"
-/plugin install slack-to-zoom@slack-to-zoom
-```
-
-Or stage it with the installer:
-
-```bash
 npx slack-to-zoom@latest --claude --global
 ```
 
-That copies the repository into `~/.claude/marketplaces/slack-to-zoom` or `./.claude/marketplaces/slack-to-zoom` and prints the exact `/plugin marketplace add` and `/plugin install` commands to run inside Claude Code.
+Or install into the current project:
+
+```bash
+npx slack-to-zoom@latest --claude --local
+```
+
+That installs the suite directly into `~/.claude/slack-to-zoom` or `./.claude/slack-to-zoom`, adds the Claude skill under `skills/slack-to-zoom`, and adds slash commands under `commands/stz/`. No follow-up `/plugin` commands are required.
 
 ### Commands
 

@@ -6,12 +6,13 @@ Shared migration logic is in `../../../shared/slack-to-zoom/`.
 
 ## Install
 
-Install from the repo root inside Claude Code:
+Install with the package installer:
 
-```text
-/plugin marketplace add "<repo-root>"
-/plugin install slack-to-zoom@slack-to-zoom
+```bash
+npx slack-to-zoom@latest --claude --global
 ```
+
+That installs the suite into `~/.claude/slack-to-zoom`, copies the Claude skill into `~/.claude/skills/slack-to-zoom`, and installs slash commands into `~/.claude/commands/stz/`.
 
 ## Commands
 
@@ -33,4 +34,4 @@ Example:
 
 - `SKILL.md` Claude skill definition
 - `commands/` Claude slash-command metadata
-- `.claude-plugin/` Claude marketplace metadata
+- `.claude-plugin/` legacy marketplace metadata

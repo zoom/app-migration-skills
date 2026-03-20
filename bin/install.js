@@ -6,7 +6,7 @@ const path = require("path");
 const readline = require("readline");
 
 const PACKAGE_NAME = "slack-to-zoom";
-const CLAUDE_PLUGIN_NAME = "slack-to-zoom";
+const CLAUDE_COMMAND_NAMESPACE = "stz";
 
 function parseArgs(argv) {
   const args = new Set(argv);
@@ -39,7 +39,7 @@ function printHelp() {
 
 Flags:
   --codex   Install the Codex skill
-  --claude  Stage the Claude marketplace package
+  --claude  Install the Claude skill and slash commands
   --global  Install into ~/.<runtime>
   --local   Install into ./.<runtime> for the current project
   --help    Show this help text
@@ -91,6 +91,89 @@ function linkSkill(sourcePath, linkPath) {
 
   const linkType = process.platform === "win32" ? "junction" : "dir";
   fs.symlinkSync(sourcePath, linkPath, linkType);
+}
+
+function writeTextFile(filePath, contents) {
+  ensureDir(path.dirname(filePath));
+  fs.writeFileSync(filePath, contents);
+}
+
+function toDisplayPath(filePath) {
+  return filePath.split(path.sep).join("/");
+}
+
+function rewriteClaudeReferences(contents, suiteRoot) {
+  return contents.replaceAll(
+    "../../../shared/slack-to-zoom/",
+    `${toDisplayPath(path.join(suiteRoot, "shared", "slack-to-zoom"))}/`
+  );
+}
+
+function rewriteClaudeSkillContents(contents, suiteRoot, claudeRoot) {
+  return rewriteClaudeReferences(contents, suiteRoot).replace(
+    "commands/stz-migrate.md",
+    toDisplayPath(path.join(claudeRoot, "commands", CLAUDE_COMMAND_NAMESPACE, "migrate.md"))
+  );
+}
+
+function installClaudeCommands(suiteRoot, claudeRoot) {
+  const sourceRoot = path.join(
+    suiteRoot,
+    "claude",
+    "skills",
+    PACKAGE_NAME,
+    "commands"
+  );
+  const commandRoot = path.join(claudeRoot, "commands", CLAUDE_COMMAND_NAMESPACE);
+
+  removeTarget(commandRoot);
+  ensureDir(commandRoot);
+
+  const commandFiles = fs
+    .readdirSync(sourceRoot)
+    .filter((name) => name.endsWith(".md"))
+    .sort();
+
+  for (const fileName of commandFiles) {
+    if (!fileName.startsWith("stz-")) {
+      continue;
+    }
+
+    const sourcePath = path.join(sourceRoot, fileName);
+    const targetName = `${fileName.slice(4, -3)}.md`;
+    const targetPath = path.join(commandRoot, targetName);
+    const contents = fs.readFileSync(sourcePath, "utf8");
+    writeTextFile(targetPath, rewriteClaudeReferences(contents, suiteRoot));
+  }
+
+  const legacySource = path.join(sourceRoot, "slack-to-zoom-migrate.md");
+  const legacyTarget = path.join(claudeRoot, "commands", "slack-to-zoom-migrate.md");
+  writeTextFile(
+    legacyTarget,
+    rewriteClaudeReferences(fs.readFileSync(legacySource, "utf8"), suiteRoot)
+  );
+
+  return commandFiles.filter((name) => name.startsWith("stz-")).length + 1;
+}
+
+function installClaudeSkill(suiteRoot, claudeRoot) {
+  const sourceRoot = path.join(suiteRoot, "claude", "skills", PACKAGE_NAME);
+  const targetRoot = path.join(claudeRoot, "skills", PACKAGE_NAME);
+
+  removeTarget(targetRoot);
+  ensureDir(targetRoot);
+
+  const skillFiles = ["SKILL.md", "README.md"];
+  for (const fileName of skillFiles) {
+    const sourcePath = path.join(sourceRoot, fileName);
+    const targetPath = path.join(targetRoot, fileName);
+    const contents = fs.readFileSync(sourcePath, "utf8");
+    const rewritten =
+      fileName === "SKILL.md"
+        ? rewriteClaudeSkillContents(contents, suiteRoot, claudeRoot)
+        : rewriteClaudeReferences(contents, suiteRoot);
+    writeTextFile(targetPath, rewritten);
+  }
 }
 
 function listSkillNames(skillsRoot) {
@@ -203,17 +286,19 @@ function installClaude(scope) {
     scope === "local"
       ? path.join(process.cwd(), ".claude")
       : path.join(os.homedir(), ".claude");
-
+  const suiteRoot = path.join(claudeRoot, PACKAGE_NAME);
   const marketplaceRoot = path.join(claudeRoot, "marketplaces", PACKAGE_NAME);
 
-  ensureDir(path.join(claudeRoot, "marketplaces"));
+  ensureDir(claudeRoot);
+  removeTarget(suiteRoot);
   removeTarget(marketplaceRoot);
-  copyPackageContents(packageRoot, marketplaceRoot);
+  copyPackageContents(packageRoot, suiteRoot);
+  installClaudeSkill(suiteRoot, claudeRoot);
+  const commandCount = installClaudeCommands(suiteRoot, claudeRoot);
 
-  console.log(`Staged Claude marketplace package at ${marketplaceRoot}`);
-  console.log("Run these commands inside Claude Code to finish installation:");
-  console.log(`/plugin marketplace add "${marketplaceRoot}"`);
-  console.log(`/plugin install ${CLAUDE_PLUGIN_NAME}@${PACKAGE_NAME}`);
+  console.log(`Installed Claude skill into ${path.join(claudeRoot, "skills", PACKAGE_NAME)}`);
+  console.log(`Installed ${commandCount} Claude commands into ${path.join(claudeRoot, "commands")}`);
+  console.log(`Installed suite root at ${suiteRoot}`);
 }
 
 async function main() {
