@@ -1,0 +1,3 @@
+display_name: Slack to Zoom Migration
+short_description: Migrate Slack apps to Zoom Team Chat with shared templates and API mappings.
+default_prompt: Migrate this Slack app to Zoom Team Chat and generate the resulting project, validation output, and migration documentation.
