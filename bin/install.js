@@ -102,6 +102,39 @@ function toDisplayPath(filePath) {
   return filePath.split(path.sep).join("/");
 }
 
+const CODEX_SUB_SKILLS = [
+  "$stz-discover  — inventory Slack app features and blockers",
+  "$stz-map       — map Slack APIs to Zoom equivalents",
+  "$stz-generate  — generate the Zoom TypeScript implementation",
+  "$stz-document  — write migration and setup documentation",
+  "$stz-validate  — run local tests and startup validation",
+  "$stz-handoff   — produce the final summary and handoff doc"
+];
+
+function buildCodexAdapter(skillName) {
+  const isFullFlow = skillName === "stz-migrate" || skillName === "slack-to-zoom";
+  const invocation = `$${skillName} <github-url-or-local-path>`;
+  const lines = [
+    "<codex_skill_adapter>",
+    `Invoke as: ${invocation}`,
+    "Input: Slack app GitHub URL or local directory path.",
+  ];
+  if (isFullFlow) {
+    lines.push("", "Individual stage sub-skills:");
+    for (const s of CODEX_SUB_SKILLS) lines.push(`  ${s}`);
+  }
+  lines.push("</codex_skill_adapter>", "");
+  return lines.join("\n");
+}
+
+function rewriteCodexReferences(contents, suiteRoot, skillName) {
+  const rewritten = contents.replaceAll(
+    "../../shared/slack-to-zoom/",
+    `${toDisplayPath(path.join(suiteRoot, "shared", "slack-to-zoom"))}/`
+  );
+  return buildCodexAdapter(skillName) + rewritten;
+}
+
 function rewriteClaudeReferences(contents, suiteRoot) {
   return contents.replaceAll(
     "../../../shared/slack-to-zoom/",
@@ -252,13 +285,14 @@ async function selectScope() {
   }
 }
 
-function installCodex(scope) {
+function installCodex(scope, rootOverride) {
   const packageRoot = path.resolve(__dirname, "..");
   const packageSkillsRoot = path.join(packageRoot, "skills");
-  const codexRoot =
+  const codexRoot = rootOverride || (
     scope === "local"
       ? path.join(process.cwd(), ".codex")
-      : path.join(os.homedir(), ".codex");
+      : path.join(os.homedir(), ".codex")
+  );
 
   const suiteRoot = path.join(codexRoot, PACKAGE_NAME);
   const skillsRoot = path.join(codexRoot, "skills");
@@ -271,21 +305,33 @@ function installCodex(scope) {
 
   const skillNames = listSkillNames(packageSkillsRoot);
   for (const skillName of skillNames) {
-    const bundledSkill = path.join(suiteRoot, "skills", skillName);
-    const skillLink = path.join(skillsRoot, skillName);
-    linkSkill(bundledSkill, skillLink);
+    const bundledSkillDir = path.join(suiteRoot, "skills", skillName);
+    const skillTargetDir = path.join(skillsRoot, skillName);
+
+    removeTarget(skillTargetDir);
+    ensureDir(skillTargetDir);
+
+    const skillMdSource = path.join(bundledSkillDir, "SKILL.md");
+    if (fs.existsSync(skillMdSource)) {
+      const contents = fs.readFileSync(skillMdSource, "utf8");
+      writeTextFile(
+        path.join(skillTargetDir, "SKILL.md"),
+        rewriteCodexReferences(contents, suiteRoot, skillName)
+      );
+    }
   }
 
   console.log(`Installed ${skillNames.length} Codex skills into ${skillsRoot}`);
   console.log(`Installed suite root at ${suiteRoot}`);
 }
 
-function installClaude(scope) {
+function installClaude(scope, rootOverride) {
   const packageRoot = path.resolve(__dirname, "..");
-  const claudeRoot =
+  const claudeRoot = rootOverride || (
     scope === "local"
       ? path.join(process.cwd(), ".claude")
-      : path.join(os.homedir(), ".claude");
+      : path.join(os.homedir(), ".claude")
+  );
   const suiteRoot = path.join(claudeRoot, PACKAGE_NAME);
   const marketplaceRoot = path.join(claudeRoot, "marketplaces", PACKAGE_NAME);
 
@@ -319,7 +365,19 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  buildCodexAdapter,
+  rewriteCodexReferences,
+  rewriteClaudeReferences,
+  rewriteClaudeSkillContents,
+  installCodex,
+  installClaude,
+  PACKAGE_NAME,
+};
