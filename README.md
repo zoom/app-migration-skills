@@ -63,15 +63,15 @@ Use `migrate` as the default entrypoint. Use the other stages when you want to r
 ### Install
 
 ```bash
-git clone git@github.com:zoom/app-migration-skills.git
-cd app-migration-skills
-npx slack-to-zoom@latest --claude --global
+git clone git@github.com:zoom/slack-to-zoom.git
+cd slack-to-zoom
+npx @zoom/slack-to-zoom@latest --claude --global
 ```
 
 Or install into the current project:
 
 ```bash
-npx slack-to-zoom@latest --claude --local
+npx @zoom/slack-to-zoom@latest --claude --local
 ```
 
 That installs the suite directly into `~/.claude/slack-to-zoom` or `./.claude/slack-to-zoom`, adds the Claude skill under `skills/slack-to-zoom`, and adds slash commands under `commands/stz/`. No follow-up `/plugin` commands are required.
@@ -101,19 +101,19 @@ Example:
 Install with `npx`. If you run the installer without flags, it will prompt for runtime and install scope:
 
 ```bash
-npx slack-to-zoom@latest
+npx @zoom/slack-to-zoom@latest
 ```
 
 For a direct Codex install, use:
 
 ```bash
-npx slack-to-zoom@latest --codex --global
+npx @zoom/slack-to-zoom@latest --codex --global
 ```
 
 For a project-local install, use:
 
 ```bash
-npx slack-to-zoom@latest --codex --local
+npx @zoom/slack-to-zoom@latest --codex --local
 ```
 
 The installer copies the full suite into a stable root:

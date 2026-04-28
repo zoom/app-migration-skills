@@ -1,10 +1,10 @@
 {
-  "name": "slack-to-zoom",
-  "version": "0.1.0",
+  "name": "@zoom/slack-to-zoom",
+  "version": "0.1.4",
   "description": "Installable Codex and Claude skill wrappers for Slack-to-Zoom migration workflows.",
   "license": "MIT",
   "bin": {
-    "slack-to-zoom": "./bin/install.js"
+    "slack-to-zoom": "bin/install.js"
   },
   "files": [
     "bin",
@@ -17,5 +17,9 @@
   ],
   "engines": {
     "node": ">=18"
+  },
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && cp -r bin skills shared codex claude README.md LICENSE package.json dist/",
+    "test": "node --test test/**/*.test.js"
   }
 }
